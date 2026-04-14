@@ -1,0 +1,19 @@
+{
+  "m": [
+    1
+  ],
+  "regret": [
+    1.0630329847335815
+  ],
+  "ir": [
+    0.0
+  ],
+  "labels": [
+    "Ours (M=1)"
+  ],
+  "meta": {
+    "n_agents": 10,
+    "n_profiles": 4000,
+    "misreport_iter": 40
+  }
+}

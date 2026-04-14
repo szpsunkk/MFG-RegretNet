@@ -1,0 +1,180 @@
+{
+  "description": "RQ1 v~U[0,1], eps~U[0.1,5], budget B",
+  "n_agents": 10,
+  "budget": 50.0,
+  "num_profiles": 1000,
+  "seeds": [
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "rows": [
+    {
+      "mechanism": "PAC",
+      "mean_regret": 0.0,
+      "std_regret": 0.0,
+      "mean_ir_violation": 0.0,
+      "std_ir_violation": 0.0,
+      "honesty_proxy": 1.0,
+      "note": "grid best single-agent dev"
+    },
+    {
+      "mechanism": "VCG",
+      "mean_regret": 0.0,
+      "std_regret": 0.0,
+      "mean_ir_violation": 0.0,
+      "std_ir_violation": 0.0,
+      "honesty_proxy": 1.0,
+      "note": "grid best single-agent dev"
+    },
+    {
+      "mechanism": "CSRA",
+      "mean_regret": 60.74501113891601,
+      "std_regret": 9.536130166929468,
+      "mean_ir_violation": 0.007680757436901331,
+      "std_ir_violation": 0.00023596405503428967,
+      "honesty_proxy": 0.016195640450208458,
+      "note": "grid best single-agent dev"
+    },
+    {
+      "mechanism": "MFG-Pricing",
+      "mean_regret": 196.08477783203125,
+      "std_regret": 18.116674395977626,
+      "mean_ir_violation": 0.0,
+      "std_ir_violation": 0.0,
+      "honesty_proxy": 0.005073958582698186,
+      "note": "grid best single-agent dev"
+    },
+    {
+      "mechanism": "RegretNet",
+      "mean_regret": 1.2155287206172942,
+      "std_regret": 0.5152616846801299,
+      "mean_ir_violation": 1.0460679948329925,
+      "std_ir_violation": 0.47920549865219875,
+      "honesty_proxy": 0.45135952907953203,
+      "note": "strategy_stability=std(regret) across seeds"
+    },
+    {
+      "mechanism": "DM-RegretNet",
+      "mean_regret": 0.906452639773488,
+      "std_regret": 0.6730064335213755,
+      "mean_ir_violation": 0.6436332702636719,
+      "std_ir_violation": 0.6266766340649627,
+      "honesty_proxy": 0.5245344044417559,
+      "note": "strategy_stability=std(regret) across seeds"
+    },
+    {
+      "mechanism": "MFG-RegretNet",
+      "mean_regret": 0.5504956603050232,
+      "std_regret": 0.007218869411129375,
+      "mean_ir_violation": 0.0004335715435445309,
+      "std_ir_violation": 6.013637440857645e-05,
+      "honesty_proxy": 0.6449550460549329,
+      "note": "strategy_stability=std(regret) across seeds"
+    }
+  ],
+  "per_seed_neural": {
+    "RegretNet": [
+      {
+        "seed": 42,
+        "mean_regret": 1.6698147058486938,
+        "mean_ir_violation": 1.5689308643341064
+      },
+      {
+        "seed": 43,
+        "mean_regret": 1.695682168006897,
+        "mean_ir_violation": 1.425249457359314
+      },
+      {
+        "seed": 44,
+        "mean_regret": 1.1017400026321411,
+        "mean_ir_violation": 1.0281239748001099
+      },
+      {
+        "seed": 45,
+        "mean_regret": 1.1762651205062866,
+        "mean_ir_violation": 0.8388037085533142
+      },
+      {
+        "seed": 46,
+        "mean_regret": 0.434141606092453,
+        "mean_ir_violation": 0.3692319691181183
+      }
+    ],
+    "DM-RegretNet": [
+      {
+        "seed": 42,
+        "mean_regret": 1.5046896934509277,
+        "mean_ir_violation": 1.391607642173767
+      },
+      {
+        "seed": 43,
+        "mean_regret": 0.022994140163064003,
+        "mean_ir_violation": 0.0
+      },
+      {
+        "seed": 44,
+        "mean_regret": 1.1512337923049927,
+        "mean_ir_violation": 0.7763794660568237
+      },
+      {
+        "seed": 45,
+        "mean_regret": 1.4801294803619385,
+        "mean_ir_violation": 1.0501792430877686
+      },
+      {
+        "seed": 46,
+        "mean_regret": 0.37321609258651733,
+        "mean_ir_violation": 0.0
+      }
+    ],
+    "MFG-RegretNet": [
+      {
+        "seed": 42,
+        "mean_regret": 0.5577477812767029,
+        "mean_ir_violation": 0.000433520064689219
+      },
+      {
+        "seed": 43,
+        "mean_regret": 0.5512184500694275,
+        "mean_ir_violation": 0.0005077148671261966
+      },
+      {
+        "seed": 44,
+        "mean_regret": 0.5572678446769714,
+        "mean_ir_violation": 0.0003575292939785868
+      },
+      {
+        "seed": 45,
+        "mean_regret": 0.5437269806861877,
+        "mean_ir_violation": 0.00047444645315408707
+      },
+      {
+        "seed": 46,
+        "mean_regret": 0.5425172448158264,
+        "mean_ir_violation": 0.00039464703877456486
+      }
+    ]
+  },
+  "ttest_regretnet_vs_mfg": {
+    "test": "Welch t-test on per-seed mean regret",
+    "RegretNet_seeds": [
+      1.6698147058486938,
+      1.695682168006897,
+      1.1017400026321411,
+      1.1762651205062866,
+      0.434141606092453
+    ],
+    "MFG-RegretNet_seeds": [
+      0.5577477812767029,
+      0.5512184500694275,
+      0.5572678446769714,
+      0.5437269806861877,
+      0.5425172448158264
+    ],
+    "statistic": 2.885743795093535,
+    "pvalue": 0.04473286736222401
+  }
+}

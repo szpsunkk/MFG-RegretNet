@@ -3,13 +3,20 @@ import random
 import os
 import pickle
 from operator import itemgetter
-from torchvision import datasets, transforms
 import numpy as np
 import json
 import math
 from tqdm import tqdm
 import multiprocessing as mp
 from datasets import load_bank, load_kdd99, load_nslkdd
+from datasets_fl_benchmark import (
+    load_mnist,
+    load_cifar10,
+    load_fmnist,
+    load_shakespeare_leaf,
+    load_shakespeare_dummy,
+    dirichlet_split,
+)
 import torch.utils.data as Data
 import time
 
@@ -33,25 +40,31 @@ def extr_noniid_dirt(dataset, n_clients, n_classes, alpha=0.5):
         idxs_classes.append(idxs_classj)
 
     max_class = np.argmax(data_size_each_class)
-
-
-    # for i in range(n_clients):
-    #     rand_set = np.random.choice(idxs_classes[max_class], 10, replace=False).tolist()
-    #     idxs_classes[max_class] = list(set(idxs_classes[max_class]) - set(rand_set))
-    #     idxs_client_dict[i] = idxs_client_dict[i] + rand_set
-    # data_size_each_class[max_class] -= 10 * n_clients
+    reserve_per_client = 10
+    reserve_total = reserve_per_client * n_clients
+    # Only reserve from max class if it has enough samples (avoid negative dimensions)
+    if data_size_each_class[max_class].item() >= reserve_total:
+        data_size_each_class[max_class] -= reserve_total
+    else:
+        reserve_total = 0
 
     distribution = np.random.dirichlet(np.repeat(alpha, n_clients), size=n_classes).astype(np.float64)
-    data_size_each_class[max_class] -= 10 * n_clients
-    data_size_each_class_client = (distribution * data_size_each_class).astype(int)
-    data_size_each_class_client[max_class] += 10
+    data_size_each_class_client = (distribution * data_size_each_class).astype(np.int64)
+    data_size_each_class_client = np.maximum(data_size_each_class_client, 0)
+    if reserve_total > 0:
+        data_size_each_class_client[max_class] += reserve_per_client
 
     for i in range(n_clients):
         for j in range(n_classes):
+            take = int(data_size_each_class_client[j, i])
             if i == n_clients - 1:
                 rand_set = idxs_classes[j]
             else:
-                rand_set = np.random.choice(idxs_classes[j], data_size_each_class_client[j, i], replace=False).tolist()
+                take = min(take, len(idxs_classes[j]))
+                if take == 0:
+                    rand_set = []
+                else:
+                    rand_set = np.random.choice(idxs_classes[j], take, replace=False).tolist()
             idxs_classes[j] = list(set(idxs_classes[j]) - set(rand_set))
             idxs_client_dict[i] = idxs_client_dict[i] + rand_set
 
@@ -98,10 +111,10 @@ class Client:
 
         bid = []
         for k in range(n_items):
-            item = (k + 1) * self.privacy_budget / n_items
-            bid.append(self.factor * v(item))
+            item = (k + 1) * self.privacy_budget / n_items   
+            bid.append(self.factor * v(item))  # 1.3 * exp( (k+1)*1.5/items ) - 1
 
-        bid.append(self.privacy_budget)
+        bid.append(self.privacy_budget) # bid = (20 items, privacy, data_size, type, factor)
         bid.append(self.data_size)
         bid.append(type)
         bid.append(self.factor)
@@ -113,16 +126,16 @@ class Client:
         client_dict.update(self.__dict__)
         return client_dict
 
-
+# ! 这里并没有训练模型
 class Clients:
     def __init__(self):
         self.data = []
         self.n_runs = 0
-        self.dirs = "data/"
+        self.dirs = "../data/"
         self.filename = ""
         self.min_n_samples = 10
-        self.min_pbudget = 1.0
-        self.max_pbudget = 5.0
+        self.min_pbudget = 1.0   # 隐私最小花费
+        self.max_pbudget = 5.0   ## 隐私最大花费
         self.min_factor = 0.5
         self.max_factor = 1.5
 
@@ -138,6 +151,19 @@ class Clients:
         elif dataset_name == "NSL-KDD":
             train_data, _ = load_nslkdd()
             n_classes = 5
+        elif dataset_name == "MNIST":
+            train_data, _ = load_mnist()
+            n_classes = 10
+        elif dataset_name == "CIFAR10":
+            train_data, _ = load_cifar10()
+            n_classes = 10
+        elif dataset_name == "Shakespeare":
+            train_data, _, n_classes = load_shakespeare_leaf()
+            if train_data is None:
+                train_data, _, n_classes = load_shakespeare_dummy()
+        elif dataset_name == "FMNIST":
+            train_data, _ = load_fmnist()
+            n_classes = 10
         else:
             raise ValueError(f"Dataset {dataset_name} is not defined")
 
@@ -217,6 +243,8 @@ class Clients:
             f.write(content)
 
     def load_json(self):
+        import os
+        print(os.getcwd())
         with open(self.dirs+self.filename, 'r', encoding='utf8') as f:
             clients_dict = json.load(f)
 
@@ -280,23 +308,23 @@ if __name__ == '__main__':
     clients.min_pbudget = 0.5
     clients.max_pbudget = 2.0
 
-    # clients.filename = "train_profiles_2.json"
-    # clients.generate_clients_mulruns("NSL-KDD", 100, 10, 1024, iid=True, overlap=True)
-    clients.filename = "test_profiles_2mp.json"
-    clients.generate_clients_mulruns("NSL-KDD", 100, 10, 1000, iid=True, overlap=True)
+    clients.filename = "train_profiles_2mp.json"
+    clients.generate_clients_mulruns("NSL-KDD", 100, 10, 1024, iid=True, overlap=True)
+    # clients.filename = "test_profiles_2mp.json"
+    # clients.generate_clients_mulruns("NSL-KDD", 100, 10, 1000, iid=True, overlap=True)
     # for run in range(10, 100):
-    #     clients.filename = f"test_profiles_100r_{run}.json"
+    #     clients.filename = f"train_profiles_100r_{run}.json"
     #     clients.generate_clients_mulruns("NSL-KDD", 100, 10, 100, iid=False, overlap=True)
 
-    clients = Clients()
-    clients.dirs = "data/bank/iid/"
-    clients.min_pbudget = 0.5
-    clients.max_pbudget = 2.0
+    # clients = Clients()
+    # clients.dirs = "data/bank/iid/"
+    # clients.min_pbudget = 0.5
+    # clients.max_pbudget = 2.0
 
     # clients.filename = "train_profiles_2.json"
     # clients.generate_clients_mulruns("NSL-KDD", 100, 10, 1024, iid=True, overlap=True)
-    clients.filename = "test_profiles_2mp.json"
-    clients.generate_clients_mulruns("Bank", 100, 10, 1000, iid=True, overlap=True)
+    # clients.filename = "test_profiles_2mp.json"
+    # clients.generate_clients_mulruns("Bank", 100, 10, 1000, iid=True, overlap=True)
     # for run in range(10, 100):
     #     clients.filename = f"test_profiles_100r_{run}.json"
     #     clients.generate_clients_mulruns("NSL-KDD", 100, 10, 100, iid=False, overlap=True)

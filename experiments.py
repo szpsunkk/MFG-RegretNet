@@ -18,6 +18,7 @@ from torch.nn.parallel import DataParallel
 import math
 from client import Clients
 from singleminded import baseline_batch
+from baselines import pac_batch, vcg_procurement_batch, csra_qms_batch
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 torch.manual_seed(42)
 torch.cuda.manual_seed_all(42)
@@ -93,6 +94,14 @@ def map_abbr_name(auc_mech_name, aggr_mech_name):
         abbr_auc_name = "allin"
     elif auc_mech_name == "FairQuery":
         abbr_auc_name = "fairq"
+    elif auc_mech_name == "PAC":
+        abbr_auc_name = "pac"
+    elif auc_mech_name == "VCG":
+        abbr_auc_name = "vcg"
+    elif auc_mech_name == "CSRA":
+        abbr_auc_name = "csra"
+    elif auc_mech_name == "MFG-RegretNet":
+        abbr_auc_name = "mfg-reg"
     else:
         raise ValueError(f"Auction {auc_mech_name} is not defined")
 
@@ -113,6 +122,14 @@ def map_labels(trade_mech_ls):
             label += r"$\bf{DM}$-$\bf{RegretNet}$"
         elif trade_mech[0] == "All-in":
             label += r"$\bf{All-in}$"
+        elif trade_mech[0] == "PAC":
+            label += r"$\bf{PAC}$"
+        elif trade_mech[0] == "VCG":
+            label += r"$\bf{VCG}$"
+        elif trade_mech[0] == "CSRA":
+            label += r"$\bf{CSRA}$"
+        elif trade_mech[0] == "MFG-RegretNet":
+            label += r"$\bf{MFG}$-$\bf{RegretNet}$"
         else:
             label += trade_mech[0]
 
@@ -127,36 +144,56 @@ def map_labels(trade_mech_ls):
 
 
 def load_auc_model(model_name):
-    model_dict = torch.load(model_name)
+    # weights_only=False: checkpoint may contain arch with clamp_op (_mfg_clamp_min_zero) for MFGRegretNet
+    model_dict = torch.load(model_name, map_location="cpu", weights_only=False)
     arch = model_dict["arch"]
     state_dict = model_dict["state_dict"]
-    model = RegretNet(arch["n_agents"], arch["n_items"], activation=arch["activation"], hidden_layer_size=arch["hidden_layer_size"],
-                      n_hidden_layers=arch["n_hidden_layers"], p_activation=arch["p_activation"],
-                      a_activation=arch["a_activation"], separate=arch["separate"], normalized_input=arch["normalized_input"])
+    if arch.get("model_type") == "MFGRegretNet":
+        model = MFGRegretNet(
+            arch["n_agents"], arch["n_items"],
+            activation=arch["activation"],
+            hidden_layer_size=arch["hidden_layer_size"],
+            n_hidden_layers=arch["n_hidden_layers"],
+            separate=arch["separate"],
+        )
+    else:
+        model = RegretNet(
+            arch["n_agents"], arch["n_items"], activation=arch["activation"],
+            hidden_layer_size=arch["hidden_layer_size"], n_hidden_layers=arch["n_hidden_layers"],
+            p_activation=arch["p_activation"], a_activation=arch["a_activation"],
+            separate=arch["separate"], normalized_input=arch["normalized_input"]
+        )
     model = DataParallel(model)
     model.load_state_dict(state_dict)
     model = model.module
     model.deter_train = False
     model.eval()
-    # print(state_dict)
-
     return model
 
-def auction(reports, budget, trade_mech, model=None, expected=False):
+def auction(reports, budget, trade_mech, model=None, expected=False, return_payments=False):
     batch_size = reports.shape[0]
     n_agents = reports.shape[1]
     n_items = reports.shape[2] - 2
     budget = budget.view(-1, 1)
     device = reports.device
     sizes = reports[:, :, -1].view(-1, n_agents)
+    payments_out = None
 
     if trade_mech[0] == "All-in" or trade_mech[0] == "FairQuery":
-        # print(budget.shape)
         reports[:, :, 0] = reports[:, :, 0] * reports[:, :, 2]
-        plosses, payments = baseline_batch(reports, budget, method=trade_mech[0])
+        plosses, payments_out = baseline_batch(reports, budget, method=trade_mech[0])
+    elif trade_mech[0] == "PAC":
+        plosses, payments_out = pac_batch(reports, budget)
+    elif trade_mech[0] == "VCG":
+        plosses, payments_out = vcg_procurement_batch(reports, budget)
+    elif trade_mech[0] == "CSRA":
+        plosses, payments_out = csra_qms_batch(reports, budget)
+    elif trade_mech[0] == "MFG-Pricing":
+        from baselines.mfg_pricing import mfg_pricing_batch
+        plosses, payments_out = mfg_pricing_batch(reports, budget)
     else:
         reports = reports.reshape(-1, n_agents, n_items + 2)
-        allocs, payments = model((reports, budget))
+        allocs, payments_out = model((reports, budget))
         pbudgets = reports.view(-1, n_agents, n_items + 2)[:, :, -2]
 
         if expected:
@@ -164,9 +201,10 @@ def auction(reports, budget, trade_mech, model=None, expected=False):
         else:
             plosses, _ = allocs_instantiate_plosses(allocs, pbudgets)
 
-
     weights = aggr_batch(plosses, sizes, method=trade_mech[1])
 
+    if return_payments:
+        return plosses, weights, payments_out
     return plosses, weights
 
 
@@ -202,7 +240,7 @@ def acc_eval_mechs(trade_mech_ls, train_data, test_data, clients, fl_args, exp_a
         acc_budget_mech_ls = []
         for trade_mech in trade_mech_ls:
             n_items = trade_mech[3]
-            if trade_mech[0] == "All-in" or trade_mech[0] == "FairQuery":
+            if trade_mech[0] in ("All-in", "FairQuery", "PAC", "VCG", "CSRA"):
                 auc_model = None
             else:
                 model_name = trade_mech[2]
@@ -226,7 +264,7 @@ def acc_eval_mechs(trade_mech_ls, train_data, test_data, clients, fl_args, exp_a
         budget_rate = torch.rand((fl_args.rounds, 1)).to(DEVICE) * (exp_args.min_budget_rate - exp_args.max_budget_rate) + exp_args.max_budget_rate
         for trade_mech in trade_mech_ls:
             n_items = trade_mech[3]
-            if trade_mech[0] == "All-in" or trade_mech[0] == "FairQuery":
+            if trade_mech[0] in ("All-in", "FairQuery", "PAC", "VCG", "CSRA"):
                 auc_model = None
             else:
                 model_name = trade_mech[2]
@@ -337,7 +375,8 @@ def acc_load_npy(trade_mech_ls, title, file_name, labels, exp_args):
 
 
 def mse_eval(reports, budget, trade_mech, L=1.0, expected=False):
-    if trade_mech[0] == "All-in" or trade_mech[0] == "FairQuery":
+    # Match auction(): baselines do not use a neural checkpoint (trade_mech[2] may be "").
+    if trade_mech[0] in ("All-in", "FairQuery", "PAC", "VCG", "CSRA", "MFG-Pricing"):
         auc_model = None
     else:
         auc_model = load_auc_model(trade_mech[2]).to(DEVICE)
@@ -421,7 +460,7 @@ def mse_agents(trade_mech_ls, title, file_name, labels, exp_args):
                 reports[:, n_agents:, :] = reports[:, n_agents:, :] * 0.0
                 max_cost = generate_max_cost(reports[:, :n_agents, :])
                 budget = max_cost * budget_rate[j*batch_size:(j+1)*batch_size]
-                if trade_mech[0] == "All-in" or trade_mech[0] == "FairQuery":
+                if trade_mech[0] in ("All-in", "FairQuery", "PAC", "VCG", "CSRA"):
                     reports = reports[:, :n_agents, :]
                 error_bound = mse_eval(reports, budget, trade_mech)
                 error_bound = error_bound.detach().to("cpu").numpy()
@@ -439,21 +478,29 @@ def mse_agents(trade_mech_ls, title, file_name, labels, exp_args):
 def guarantees_eval(reports, budget, val_type, trade_mech, misreport_iter=100, lr=1e-1):
     batch_size = reports.shape[0]
     misreports = reports.clone().detach().to(DEVICE)
+    n_items = trade_mech[3]
 
     model_name = trade_mech[2]
     model = load_auc_model(model_name).to(DEVICE)
-    optimize_misreports(model, reports, misreports, budget=budget, val_type=val_type, misreport_iter=misreport_iter, lr=lr, train=False, instantiation=True)
+    cost_from_plosses = isinstance(model, MFGRegretNet) and n_items == 1
+    optimize_misreports(model, reports, misreports, budget=budget, val_type=val_type, misreport_iter=misreport_iter, lr=lr, train=False, instantiation=True, cost_from_plosses=cost_from_plosses)
     allocs, payments = model((reports, budget))
     vals = reports[:, :, :-2]
     sizes = reports[:, :, -1]
-    costs = torch.sum(allocs * vals, dim=2) * sizes
+    if cost_from_plosses:
+        from utils import allocs_to_plosses
+        pbudgets = reports[:, :, -2].view(-1, reports.shape[1])
+        plosses = allocs_to_plosses(allocs, pbudgets)
+        costs = vals[:, :, 0] * plosses
+    else:
+        costs = torch.sum(allocs * vals, dim=2) * sizes
 
-    truthful_util = calc_agent_util(reports, allocs, payments, instantiation=True)
-    untruthful_util = tiled_misreport_util(misreports, reports, model, budget, val_type=val_type, instantiation=True)
+    truthful_util = calc_agent_util(reports, allocs, payments, instantiation=True, cost_from_plosses=cost_from_plosses)
+    untruthful_util = tiled_misreport_util(misreports, reports, model, budget, val_type=val_type, instantiation=True, cost_from_plosses=cost_from_plosses)
     regrets = torch.clamp(untruthful_util - truthful_util, min=0)
     ir_violation = -torch.clamp(truthful_util, max=0)
-
-    return regrets / costs, ir_violation / costs
+    costs_safe = costs.clamp(min=1e-10)
+    return regrets / costs_safe, ir_violation / costs_safe
 
 
 def guarantees(trade_mech_ls, exp_args):
@@ -474,6 +521,12 @@ def guarantees(trade_mech_ls, exp_args):
 
         n_items = trade_mech[3]
         m_ls.append(n_items)
+
+        if trade_mech[0] in ("PAC", "VCG", "CSRA"):
+            regret_ls.append(0.0)
+            ir_ls.append(0.0)
+            continue
+
         data = torch.tensor(clients.return_bids(n_items)).float().to(DEVICE).reshape(-1, exp_args.n_agents, n_items + 4)
         data = data[:proflies_nb, :, :]
         batch_size = min(10000, proflies_nb)
@@ -527,6 +580,10 @@ def invalid_rate_budget(trade_mech_ls, title, file_name, labels, exp_args):
     mechs_invalid_rate_ls = []
     for trade_mech in trade_mech_ls:
         n_items = trade_mech[3]
+        if trade_mech[0] in ("PAC", "VCG", "CSRA"):
+            mechs_budget_ls.append([])
+            mechs_invalid_rate_ls.append([])
+            continue
         data = torch.tensor(clients.return_bids(n_items)).float().to(DEVICE).reshape(-1, exp_args.n_agents, n_items + 4)
         data = data[:proflies_nb, :, :-2]
         data_loader = Dataloader(data, 100000)
@@ -561,21 +618,21 @@ def invalid_rate_budget(trade_mech_ls, title, file_name, labels, exp_args):
 if __name__ == '__main__':
 
 
-    trade_mech_ls = [
-        FQ_CONVL + ["nslkdd_iid.npy"],
-        ALLIN_CONVL + ["nslkdd_iid.npy"],
-        FQ_OPT + ["nslkdd_iid.npy"],
-        ALLIN_OPT + ["nslkdd_iid.npy"]
-    ]
+    # trade_mech_ls = [
+    #     FQ_CONVL + ["nslkdd_iid.npy"],
+    #     ALLIN_CONVL + ["nslkdd_iid.npy"],
+    #     FQ_OPT + ["nslkdd_iid.npy"],
+    #     ALLIN_OPT + ["nslkdd_iid.npy"]
+    # ]
 
-    labels = map_labels(trade_mech_ls)
-    exp_args = Exp_Args()
-    exp_args.n_runs = 100
-    exp_args.dataset = "NSL-KDD"
-    exp_args.iid = True
-    exp_args.budget_rate_step = 0.1
-    exp_args.nb_budget_rate = 20
-    exp_args.max_budget_rate = 2.0
+    # labels = map_labels(trade_mech_ls)
+    # exp_args = Exp_Args()
+    # exp_args.n_runs = 100
+    # exp_args.dataset = "NSL-KDD"
+    # exp_args.iid = True
+    # exp_args.budget_rate_step = 0.1
+    # exp_args.nb_budget_rate = 20
+    # exp_args.max_budget_rate = 2.0
 
     # mse_agents(trade_mech_ls, "NSL-KDD (IID)", "figure/n_err_single_nslkdd_iid.png", labels, exp_args)
     # acc_eval_mechs_parallel(trade_mech_ls, "NSL-KDD (IID)", "figure/acc_single_nslkdd_iid.png", labels, exp_args)
@@ -592,23 +649,23 @@ if __name__ == '__main__':
     # ]
 
 
-    trade_mech_ls = [
-        REG_CONVL_BANK_IID + ["bank_iid.npy"],
-        MREG_CONVL_BANK_IID + ["bank_iid.npy"],
-        DM_CONVL_BANK_IID + ["bank_iid.npy"],
-        REG_OPT_BANK_IID + ["bank_iid.npy"],
-        MREG_OPT_BANK_IID + ["bank_iid.npy"],
-        DM_OPT_BANK_IID + ["bank_iid.npy"]
-    ]
+    # trade_mech_ls = [
+    #     REG_CONVL_BANK_IID + ["bank_iid.npy"],
+    #     MREG_CONVL_BANK_IID + ["bank_iid.npy"],
+    #     DM_CONVL_BANK_IID + ["bank_iid.npy"],
+    #     REG_OPT_BANK_IID + ["bank_iid.npy"],
+    #     MREG_OPT_BANK_IID + ["bank_iid.npy"],
+    #     DM_OPT_BANK_IID + ["bank_iid.npy"]
+    # ]
 
-    labels = map_labels(trade_mech_ls)
-    exp_args = Exp_Args()
-    exp_args.n_runs = 100
-    exp_args.dataset = "Bank"
-    exp_args.iid = True
-    exp_args.budget_rate_step = 0.1
-    exp_args.nb_budget_rate = 20
-    exp_args.max_budget_rate = 2.0
+    # labels = map_labels(trade_mech_ls)
+    # exp_args = Exp_Args()
+    # exp_args.n_runs = 100
+    # exp_args.dataset = "Bank"
+    # exp_args.iid = True
+    # exp_args.budget_rate_step = 0.1
+    # exp_args.nb_budget_rate = 20
+    # exp_args.max_budget_rate = 2.0
 
 
     # mse_budget(trade_mech_ls, "BANK (IID)", "figure/b_err_general_bank_iid_50r.png", labels, exp_args)
@@ -629,11 +686,11 @@ if __name__ == '__main__':
 
     trade_mech_ls = [
         REG_CONVL_NSLKDD_IID + ["nslkdd_iid.npy"],
-        MREG_CONVL_NSLKDD_IID + ["nslkdd_iid.npy"],
-        DM_CONVL_NSLKDD_IID + ["nslkdd_iid.npy"],
+        # MREG_CONVL_NSLKDD_IID + ["nslkdd_iid.npy"],
+        # DM_CONVL_NSLKDD_IID + ["nslkdd_iid.npy"],
         # REG_OPT_NSLKDD_IID + ["nslkdd_iid.npy"],
         # MREG_OPT_NSLKDD_IID + ["nslkdd_iid.npy"],
-        DM_OPT_NSLKDD_IID + ["nslkdd_iid.npy"]
+        # DM_OPT_NSLKDD_IID + ["nslkdd_iid.npy"]
     ]
 
     lables_for_invalid_rate = [
@@ -655,10 +712,10 @@ if __name__ == '__main__':
     # mse_budget(trade_mech_ls, "NSL-KDD (IID)", "figure/b_err_general_nslkdd_iid_50r.png", labels, exp_args)
     # mse_agents(trade_mech_ls, "NSL-KDD (IID)", "figure/n_err_general_nslkdd_iid_50r.png", labels, exp_args)
     guarantees(trade_mech_ls, exp_args)
-    # guarantees_plot(M_EFFECT_NSLKDD_IID, "NSL-KDD (IID)", "figure/guarantee_nslkdd_iid_50r.png", exp_args)
-    # invalid_rate_budget(trade_mech_ls, "NSL-KDD (IID)", "figure/invalid_nslkdd_iid_50r.png", lables_for_invalid_rate, exp_args)
-    # acc_eval_mechs_parallel(trade_mech_ls, "NSL-KDD (IID)", "figure/acc_general_nslkdd_iid_50r.png", labels, exp_args)
-    # acc_load_npy(trade_mech_ls, "NSL-KDD (Non-IID)", "figure/acc_general_nslkdd_iid_50r.png", labels, exp_args)
+    guarantees_plot(M_EFFECT_NSLKDD_IID, "NSL-KDD (IID)", "figure/guarantee_nslkdd_iid_50r.png", exp_args)
+    invalid_rate_budget(trade_mech_ls, "NSL-KDD (IID)", "figure/invalid_nslkdd_iid_50r.png", lables_for_invalid_rate, exp_args)
+    acc_eval_mechs_parallel(trade_mech_ls, "NSL-KDD (IID)", "figure/acc_general_nslkdd_iid_50r.png", labels, exp_args)
+    acc_load_npy(trade_mech_ls, "NSL-KDD (Non-IID)", "figure/acc_general_nslkdd_iid_50r.png", labels, exp_args)
 
 
 

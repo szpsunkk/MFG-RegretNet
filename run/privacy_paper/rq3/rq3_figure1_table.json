@@ -1,0 +1,93 @@
+[
+  {
+    "key": "PAC",
+    "display": "PAC",
+    "mean_revenue": 8.169356738853455,
+    "std_revenue": 0.01564073721368417,
+    "bf_rate": 1.0,
+    "revenue_efficiency": 0.16338713477706907,
+    "std_revenue_efficiency": 0.0003128147442736832,
+    "mean_social_welfare": 4.074982071614265,
+    "std_social_welfare": 0.0232694051868227,
+    "num_rounds_T": 1000,
+    "num_seeds": 5
+  },
+  {
+    "key": "VCG",
+    "display": "VCG",
+    "mean_revenue": 8.169356738853455,
+    "std_revenue": 0.01564073721368417,
+    "bf_rate": 1.0,
+    "revenue_efficiency": 0.16338713477706907,
+    "std_revenue_efficiency": 0.0003128147442736832,
+    "mean_social_welfare": 4.074982071614265,
+    "std_social_welfare": 0.0232694051868227,
+    "num_rounds_T": 1000,
+    "num_seeds": 5
+  },
+  {
+    "key": "CSRA",
+    "display": "CSRA",
+    "mean_revenue": 31.82316757936478,
+    "std_revenue": 0.2022159534190663,
+    "bf_rate": 1.0,
+    "revenue_efficiency": 0.6364633515872955,
+    "std_revenue_efficiency": 0.004044319068381331,
+    "mean_social_welfare": 29.523582455539703,
+    "std_social_welfare": 0.17759480213355117,
+    "num_rounds_T": 1000,
+    "num_seeds": 5
+  },
+  {
+    "key": "MFG-Pricing",
+    "display": "MFG-Pricing",
+    "mean_revenue": 50.00000005111694,
+    "std_revenue": 2.3761612251141054e-08,
+    "bf_rate": 0.8698000192642212,
+    "revenue_efficiency": 1.0000000010223389,
+    "std_revenue_efficiency": 4.75232263701911e-10,
+    "mean_social_welfare": 37.20806110420227,
+    "std_social_welfare": 0.036933129493852995,
+    "num_rounds_T": 1000,
+    "num_seeds": 5
+  },
+  {
+    "key": "RegretNet",
+    "display": "RegretNet",
+    "mean_revenue": 49.226323960876464,
+    "std_revenue": 0.00428058143663576,
+    "bf_rate": 1.0,
+    "revenue_efficiency": 0.9845264792175292,
+    "std_revenue_efficiency": 8.561162873272289e-05,
+    "mean_social_welfare": 36.46642657279968,
+    "std_social_welfare": 0.037567778223213395,
+    "num_rounds_T": 1000,
+    "num_seeds": 5
+  },
+  {
+    "key": "DM-RegretNet",
+    "display": "DM-RegretNet",
+    "mean_revenue": 49.39530214004517,
+    "std_revenue": 0.001974828555599546,
+    "bf_rate": 1.0,
+    "revenue_efficiency": 0.9879060428009033,
+    "std_revenue_efficiency": 3.949657111201281e-05,
+    "mean_social_welfare": 36.63555157546997,
+    "std_social_welfare": 0.03671990068919491,
+    "num_rounds_T": 1000,
+    "num_seeds": 5
+  },
+  {
+    "key": "MFG-RegretNet",
+    "display": "Ours",
+    "mean_revenue": 49.99999999008179,
+    "std_revenue": 7.9130834879885e-08,
+    "bf_rate": 0.8419999957084656,
+    "revenue_efficiency": 0.9999999998016358,
+    "std_revenue_efficiency": 1.5826167164585148e-09,
+    "mean_social_welfare": 37.233938890075684,
+    "std_social_welfare": 0.03693266589258351,
+    "num_rounds_T": 1000,
+    "num_seeds": 5
+  }
+]

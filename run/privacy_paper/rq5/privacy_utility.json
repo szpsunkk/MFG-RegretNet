@@ -1,0 +1,21 @@
+{
+  "distribution": "uniform",
+  "avg_privacy_cost": 4.097919782002767,
+  "per_seed": [
+    {
+      "seed": 42,
+      "avg_privacy_cost": 4.115054130554199,
+      "revenue": 8.179555892944336
+    },
+    {
+      "seed": 43,
+      "avg_privacy_cost": 4.063344955444336,
+      "revenue": 8.17701530456543
+    },
+    {
+      "seed": 44,
+      "avg_privacy_cost": 4.115360260009766,
+      "revenue": 8.148772239685059
+    }
+  ]
+}

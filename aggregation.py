@@ -36,7 +36,8 @@ def diffcp_aggr_batch(plosses_batch, sizes_batch, L=1.0):
     for i in range(n_batch):
         sub_plosses = ad_plosses_batch[i][ad_plosses_batch[i] > 0.0]
         sub_sizes = sizes_batch[i][ad_plosses_batch[i] > 0.0]
-        weights_batch[i][weights_batch[i] > 0.0] = diffcp_aggr(sub_plosses, sub_sizes, L=L)
+        w = diffcp_aggr(sub_plosses, sub_sizes, L=L)
+        weights_batch[i][weights_batch[i] > 0.0] = w.to(weights_batch.dtype)
 
     return weights_batch
 
@@ -44,7 +45,10 @@ def diffcp_aggr(plosses, sizes, L=1.0):
     sensi = 2 * L
     device = plosses.device
 
-    vars = (2 * (sensi / plosses) ** 2)
+    # plosses→0 时 (sensi/plosses)^2 爆炸，Q 病态导致 CVXPY SolverError
+    plosses_safe = torch.clamp(plosses, min=1e-4, max=1e3)
+    vars = (2 * (sensi / plosses_safe) ** 2)
+    vars = torch.clamp(vars, max=1e8)
     n_agents = vars.shape[0]
 
     Q1 = torch.diag_embed(vars.detach()).cpu()
@@ -77,7 +81,9 @@ def diffcp_aggr(plosses, sizes, L=1.0):
 
 
     constrains = [A @ x_cvxpy == 1, G @ x_cvxpy <= h_cvxpy]
-    objective = cp.Minimize(0.5 * cp.quad_form(x_cvxpy, Q))
+    # Q is PSD by construction (block diag + rank-1); psd_wrap avoids ARPACK eig check that can fail for large N (e.g. 50)
+    Q_psd = cp.psd_wrap(Q.numpy())
+    objective = cp.Minimize(0.5 * cp.quad_form(x_cvxpy, Q_psd))
     problem = cp.Problem(objective, constrains)
 
     try:
@@ -89,13 +95,14 @@ def diffcp_aggr(plosses, sizes, L=1.0):
     try:
         solution, = cvxpylayer(h)
         weights = solution[:n_agents].to(device)
-    except:
-        print("SolverError")
-        print(vars)
-        if L == 0.00001:
-            print("turn to VarOpt")
+    except Exception:
+        if L <= 1e-5:
             return var_opt_aggr_batch(plosses.view(1, -1))
-        weights = diffcp_aggr(plosses, sizes, L=L * 0.1)
+        try:
+            weights = diffcp_aggr(plosses, sizes, L=L * 0.25)
+            return weights.reshape(1, -1) if weights.dim() == 1 else weights
+        except Exception:
+            return var_opt_aggr_batch(plosses.view(1, -1))
 
     return weights.reshape(1, -1)
 

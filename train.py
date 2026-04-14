@@ -1,17 +1,18 @@
 import os
 from argparse import ArgumentParser
+from torch.utils.tensorboard import SummaryWriter
 parser = ArgumentParser()
 parser.add_argument('--random-seed', type=int, default=42)
 parser.add_argument('--num-examples', type=int, default=102400)
 parser.add_argument('--test-num-examples', type=int, default=10000)
-parser.add_argument('--n-agents', type=int, default=10)
-parser.add_argument('--n-items', type=int, default=20)
-parser.add_argument('--num-epochs', type=int, default=10)
-parser.add_argument('--batch-size', type=int, default=1024)
+parser.add_argument('--n-agents', type=int, default=10)   # 投标者的数量
+parser.add_argument('--n-items', type=int, default=20)    # 投标的项目
+parser.add_argument('--num-epochs', type=int, default=1)
+parser.add_argument('--batch-size', type=int, default=4096)
 parser.add_argument('--test-batch-size', type=int, default=500)
 parser.add_argument('--model-lr', type=float, default=0.001)
-parser.add_argument('--max-budget-rate', type=float, default=5.0)
-parser.add_argument('--min-budget-rate', type=float, default=0.1)
+parser.add_argument('--max-budget-rate', type=float, default=5.0)  # 最大的隐私消耗
+parser.add_argument('--min-budget-rate', type=float, default=0.1)  # 最小的隐私消耗
 parser.add_argument('--activation', default="tanh")
 
 parser.add_argument('--misreport-lr', type=float, default=1e-1)
@@ -63,7 +64,7 @@ parser.add_argument('--teacher-model', default="")
 parser.add_argument('--name', default='test')
 parser.add_argument('--host', type=int, default=23456)
 parser.add_argument('--gpu', type=str, default="0")
-parser.add_argument('--data-dir', default='data/')
+parser.add_argument('--data-dir', default='/home/skk/FL/market/FL-Market/data/nslkdd/iid/')
 
 args = parser.parse_args()
 os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu
@@ -73,7 +74,7 @@ from torch.nn.parallel import DataParallel
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 import numpy as np
 from datasets import generate_dataset_from_json
-from regretnet import RegretNet, train_loop, test_loop
+from regretnet import RegretNet, train_loop, test_loop, MFGRegretNet
 from datasets import Dataloader
 from client import Clients
 import json
@@ -88,7 +89,7 @@ if __name__ == "__main__":
     model = RegretNet(args.n_agents, args.n_items, activation=args.activation, hidden_layer_size=args.hidden_layer_size,
                       n_hidden_layers=args.n_hidden_layers, p_activation=args.p_activation,
                       a_activation=args.a_activation, separate=args.separate, smoothing=args.smoothing, normalized_input=args.normalized_input)
-    model = DataParallel(model).cuda()
+    # model = DataParallel(model).cuda()  # 多个GPU训练时
     # model_name = "result/kn0529_dm_opt_nslkdd_iid_50_checkpoint.pt"
     # model_dict = torch.load(model_name)
     # arch = model_dict["arch"]
@@ -96,9 +97,9 @@ if __name__ == "__main__":
     # model = RegretNet(arch["n_agents"], arch["n_items"], activation=arch["activation"], hidden_layer_size=arch["hidden_layer_size"],
     #                   n_hidden_layers=arch["n_hidden_layers"], p_activation=arch["p_activation"],
     #                   a_activation=arch["a_activation"], separate=arch["separate"])
-    # model = DataParallel(model)
+    model = DataParallel(model)  # ValueError: Problem must be DPP.
     # model.load_state_dict(state_dict)
-
+    writer = SummaryWriter(log_dir=f"run/{args.name}-{args.n_agents}-{args.n_items}", comment=f"{args}")
     clients = Clients()
     clients.dirs = args.data_dir
 
@@ -108,17 +109,18 @@ if __name__ == "__main__":
     print(train_data.shape)
     train_loader = Dataloader(train_data, batch_size=args.batch_size, shuffle=True)
 
-    # clients.filename = "test_profiles_2mp.json"
-    # clients.load_json()
-    # test_data = torch.tensor(clients.return_bids(args.n_items)).float().cuda().view(-1, args.n_agents, args.n_items + 4)
-    # test_data = test_data[:args.test_num_examples]
-    # test_loader = Dataloader(test_data, batch_size=args.test_batch_size)
+    clients.filename = "test_profiles_2mp.json"
+    clients.load_json()
+    test_data = torch.tensor(clients.return_bids(args.n_items)).float().cuda().view(-1, args.n_agents, args.n_items + 4)
+    test_data = test_data[:args.test_num_examples]
+    test_loader = Dataloader(test_data, batch_size=args.test_batch_size)
 
     train_loop(
-        model, train_loader, None, args, device=DEVICE
+        model, train_loader, None, args, device=DEVICE, writer=writer
     )
+    writer.close()
 
-    # test_result = test_loop(
-    #     model, test_loader, args, device=DEVICE
-    # )
-    # print(json.dumps(test_result, indent=4, sort_keys=True))
+    test_result = test_loop(
+        model, test_loader, args, device=DEVICE
+    )
+    print(json.dumps(test_result, indent=4, sort_keys=True))

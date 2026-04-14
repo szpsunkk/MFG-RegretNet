@@ -1,0 +1,417 @@
+{
+  "meta": {
+    "note": "Batch=100 profiles per timing call. t_local = single-client proxy (parallel FL assumption). Server grad agg is serial O(N).",
+    "n_list": [
+      10,
+      50,
+      100,
+      200,
+      500
+    ],
+    "budget": 50.0,
+    "warmup": 3,
+    "repeat": 20
+  },
+  "rq2_time_rows": [
+    {
+      "n_agents": 10,
+      "mechanism": "PAC",
+      "mean_time_sec": 0.0038534919440280646,
+      "t_auction_core": 0.003642440104158595,
+      "t_mechanism_aggr": 0.0002110518398694694
+    },
+    {
+      "n_agents": 10,
+      "mechanism": "VCG",
+      "mean_time_sec": 0.005070823960704729,
+      "t_auction_core": 0.004875751404324546,
+      "t_mechanism_aggr": 0.0001950725563801825
+    },
+    {
+      "n_agents": 10,
+      "mechanism": "CSRA",
+      "mean_time_sec": 0.00782941936631687,
+      "t_auction_core": 0.007624280510935932,
+      "t_mechanism_aggr": 0.00020513885538093747
+    },
+    {
+      "n_agents": 10,
+      "mechanism": "MFG-Pricing",
+      "mean_time_sec": 0.00029795620357617734,
+      "t_auction_core": 0.00013380935124587267,
+      "t_mechanism_aggr": 0.0001641468523303047
+    },
+    {
+      "n_agents": 10,
+      "mechanism": "Ours",
+      "mean_time_sec": 0.0015349200082710012,
+      "t_auction_core": 0.001351335653453134,
+      "t_mechanism_aggr": 0.0001835843548178673
+    },
+    {
+      "n_agents": 10,
+      "mechanism": "RegretNet",
+      "mean_time_sec": 0.0020867223967798052,
+      "t_auction_core": 0.0018979960994329303,
+      "t_mechanism_aggr": 0.00018872629734687508
+    },
+    {
+      "n_agents": 10,
+      "mechanism": "DM-RegretNet",
+      "mean_time_sec": 0.0021077508979942647,
+      "t_auction_core": 0.0019206284428946673,
+      "t_mechanism_aggr": 0.00018712245509959756
+    },
+    {
+      "n_agents": 50,
+      "mechanism": "PAC",
+      "mean_time_sec": 0.013828902950626798,
+      "t_auction_core": 0.01361659744870849,
+      "t_mechanism_aggr": 0.00021230550191830844
+    },
+    {
+      "n_agents": 50,
+      "mechanism": "VCG",
+      "mean_time_sec": 0.013915975199779496,
+      "t_auction_core": 0.013695927342632785,
+      "t_mechanism_aggr": 0.00022004785714671015
+    },
+    {
+      "n_agents": 50,
+      "mechanism": "CSRA",
+      "mean_time_sec": 0.02218415018869564,
+      "t_auction_core": 0.021975506644230335,
+      "t_mechanism_aggr": 0.0002086435444653034
+    },
+    {
+      "n_agents": 50,
+      "mechanism": "MFG-Pricing",
+      "mean_time_sec": 0.0003201438521500677,
+      "t_auction_core": 0.00014446509594563396,
+      "t_mechanism_aggr": 0.00017567875620443373
+    },
+    {
+      "n_agents": 50,
+      "mechanism": "Ours",
+      "mean_time_sec": 0.001487859003827907,
+      "t_auction_core": 0.0013079315045615657,
+      "t_mechanism_aggr": 0.00017992749926634132
+    },
+    {
+      "n_agents": 100,
+      "mechanism": "PAC",
+      "mean_time_sec": 0.024162692142999733,
+      "t_auction_core": 0.023960155789973216,
+      "t_mechanism_aggr": 0.00020253635302651672
+    },
+    {
+      "n_agents": 100,
+      "mechanism": "VCG",
+      "mean_time_sec": 0.024569103299290875,
+      "t_auction_core": 0.02435747934796382,
+      "t_mechanism_aggr": 0.00021162395132705568
+    },
+    {
+      "n_agents": 100,
+      "mechanism": "CSRA",
+      "mean_time_sec": 0.039992794758290984,
+      "t_auction_core": 0.03976416561054066,
+      "t_mechanism_aggr": 0.0002286291477503255
+    },
+    {
+      "n_agents": 100,
+      "mechanism": "MFG-Pricing",
+      "mean_time_sec": 0.00030082895536907015,
+      "t_auction_core": 0.00013473745493683965,
+      "t_mechanism_aggr": 0.00016609150043223053
+    },
+    {
+      "n_agents": 100,
+      "mechanism": "Ours",
+      "mean_time_sec": 0.0014869319973513484,
+      "t_auction_core": 0.0013040679012192413,
+      "t_mechanism_aggr": 0.00018286409613210708
+    },
+    {
+      "n_agents": 200,
+      "mechanism": "PAC",
+      "mean_time_sec": 0.047653794652433135,
+      "t_auction_core": 0.04741154925432056,
+      "t_mechanism_aggr": 0.00024224539811257273
+    },
+    {
+      "n_agents": 200,
+      "mechanism": "VCG",
+      "mean_time_sec": 0.04809125880419742,
+      "t_auction_core": 0.04785350569873117,
+      "t_mechanism_aggr": 0.00023775310546625406
+    },
+    {
+      "n_agents": 200,
+      "mechanism": "CSRA",
+      "mean_time_sec": 0.07703864850336685,
+      "t_auction_core": 0.07678669300221372,
+      "t_mechanism_aggr": 0.0002519555011531338
+    },
+    {
+      "n_agents": 200,
+      "mechanism": "MFG-Pricing",
+      "mean_time_sec": 0.0003089577978244052,
+      "t_auction_core": 0.00013726994511671365,
+      "t_mechanism_aggr": 0.0001716878527076915
+    },
+    {
+      "n_agents": 500,
+      "mechanism": "PAC",
+      "mean_time_sec": 0.138905336643802,
+      "t_auction_core": 0.13864595995109993,
+      "t_mechanism_aggr": 0.00025937669270206245
+    },
+    {
+      "n_agents": 500,
+      "mechanism": "VCG",
+      "mean_time_sec": 0.15798724796040914,
+      "t_auction_core": 0.15772711275785695,
+      "t_mechanism_aggr": 0.0002601352025521919
+    },
+    {
+      "n_agents": 500,
+      "mechanism": "CSRA",
+      "mean_time_sec": 0.13718402915401384,
+      "t_auction_core": 0.13701047360373195,
+      "t_mechanism_aggr": 0.00017355555028188973
+    },
+    {
+      "n_agents": 500,
+      "mechanism": "MFG-Pricing",
+      "mean_time_sec": 0.0001275450980756432,
+      "t_auction_core": 5.6831492111086844e-05,
+      "t_mechanism_aggr": 7.071360596455634e-05
+    }
+  ],
+  "per_n_detail": {
+    "10": {
+      "PAC": {
+        "t_auction_solve": 0.003642440104158595,
+        "t_aggr_fl_weights": 0.0002110518398694694,
+        "t_local_train_proxy": 0.001052993000485003,
+        "t_server_grad_agg": 0.0002841789973899722,
+        "peak_gpu_gb": 0.015904903411865234,
+        "comm_bytes_est": 280
+      },
+      "VCG": {
+        "t_auction_solve": 0.004875751404324546,
+        "t_aggr_fl_weights": 0.0001950725563801825,
+        "t_local_train_proxy": 0.0007669259794056416,
+        "t_server_grad_agg": 0.0002810420119203627,
+        "peak_gpu_gb": 0.015904903411865234,
+        "comm_bytes_est": 280
+      },
+      "CSRA": {
+        "t_auction_solve": 0.007624280510935932,
+        "t_aggr_fl_weights": 0.00020513885538093747,
+        "t_local_train_proxy": 0.0007409650133922696,
+        "t_server_grad_agg": 0.00028052396373823285,
+        "peak_gpu_gb": 0.015904903411865234,
+        "comm_bytes_est": 280
+      },
+      "MFG-Pricing": {
+        "t_auction_solve": 0.00013380935124587267,
+        "t_aggr_fl_weights": 0.0001641468523303047,
+        "t_local_train_proxy": 0.0007214490324258804,
+        "t_server_grad_agg": 0.00028132001170888543,
+        "peak_gpu_gb": 0.015904903411865234,
+        "comm_bytes_est": 280
+      },
+      "Ours": {
+        "t_auction_solve": 0.001351335653453134,
+        "t_aggr_fl_weights": 0.0001835843548178673,
+        "t_local_train_proxy": 0.0007422000053338706,
+        "t_server_grad_agg": 0.00028497102903202176,
+        "peak_gpu_gb": 0.0175018310546875,
+        "comm_bytes_est": 2840,
+        "ckpt": "result/mfg_regretnet_privacy_200_checkpoint.pt"
+      },
+      "RegretNet": {
+        "t_auction_solve": 0.0018979960994329303,
+        "t_aggr_fl_weights": 0.00018872629734687508,
+        "t_local_train_proxy": 0.0008087810128927231,
+        "t_server_grad_agg": 0.0003946060314774513,
+        "peak_gpu_gb": 0.017798423767089844,
+        "comm_bytes_est": 2840,
+        "ckpt": "result/regretnet_privacy_pcost_200_checkpoint.pt"
+      },
+      "DM-RegretNet": {
+        "t_auction_solve": 0.0019206284428946673,
+        "t_aggr_fl_weights": 0.00018712245509959756,
+        "t_local_train_proxy": 0.0007290940266102552,
+        "t_server_grad_agg": 0.0004745979676954448,
+        "peak_gpu_gb": 0.01777172088623047,
+        "comm_bytes_est": 2840,
+        "ckpt": "result/dm_regretnet_privacy_pcost_200_checkpoint.pt"
+      }
+    },
+    "50": {
+      "PAC": {
+        "t_auction_solve": 0.01361659744870849,
+        "t_aggr_fl_weights": 0.00021230550191830844,
+        "t_local_train_proxy": 0.0008180420263670385,
+        "t_server_grad_agg": 0.0013500909553840756,
+        "peak_gpu_gb": 0.016282081604003906,
+        "comm_bytes_est": 1400
+      },
+      "VCG": {
+        "t_auction_solve": 0.013695927342632785,
+        "t_aggr_fl_weights": 0.00022004785714671015,
+        "t_local_train_proxy": 0.000792442006058991,
+        "t_server_grad_agg": 0.0013081629876978695,
+        "peak_gpu_gb": 0.016056537628173828,
+        "comm_bytes_est": 1400
+      },
+      "CSRA": {
+        "t_auction_solve": 0.021975506644230335,
+        "t_aggr_fl_weights": 0.0002086435444653034,
+        "t_local_train_proxy": 0.0007560189696960151,
+        "t_server_grad_agg": 0.0012373990030027926,
+        "peak_gpu_gb": 0.016056537628173828,
+        "comm_bytes_est": 1400
+      },
+      "MFG-Pricing": {
+        "t_auction_solve": 0.00014446509594563396,
+        "t_aggr_fl_weights": 0.00017567875620443373,
+        "t_local_train_proxy": 0.0007382339681498706,
+        "t_server_grad_agg": 0.0012369779869914055,
+        "peak_gpu_gb": 0.016056537628173828,
+        "comm_bytes_est": 1400
+      },
+      "Ours": {
+        "t_auction_solve": 0.0013079315045615657,
+        "t_aggr_fl_weights": 0.00017992749926634132,
+        "t_local_train_proxy": 0.0007463999791070819,
+        "t_server_grad_agg": 0.0012827409664168954,
+        "peak_gpu_gb": 0.01799297332763672,
+        "comm_bytes_est": 14200,
+        "ckpt": "result/mfg_regretnet_n50_5_checkpoint.pt"
+      }
+    },
+    "100": {
+      "PAC": {
+        "t_auction_solve": 0.023960155789973216,
+        "t_aggr_fl_weights": 0.00020253635302651672,
+        "t_local_train_proxy": 0.0007550099981017411,
+        "t_server_grad_agg": 0.002442988974507898,
+        "peak_gpu_gb": 0.01670217514038086,
+        "comm_bytes_est": 2800
+      },
+      "VCG": {
+        "t_auction_solve": 0.02435747934796382,
+        "t_aggr_fl_weights": 0.00021162395132705568,
+        "t_local_train_proxy": 0.0007697599940001965,
+        "t_server_grad_agg": 0.0024699430214241147,
+        "peak_gpu_gb": 0.01627349853515625,
+        "comm_bytes_est": 2800
+      },
+      "CSRA": {
+        "t_auction_solve": 0.03976416561054066,
+        "t_aggr_fl_weights": 0.0002286291477503255,
+        "t_local_train_proxy": 0.0007462530047632754,
+        "t_server_grad_agg": 0.0024317839997820556,
+        "peak_gpu_gb": 0.01627349853515625,
+        "comm_bytes_est": 2800
+      },
+      "MFG-Pricing": {
+        "t_auction_solve": 0.00013473745493683965,
+        "t_aggr_fl_weights": 0.00016609150043223053,
+        "t_local_train_proxy": 0.0007485110545530915,
+        "t_server_grad_agg": 0.002430747030302882,
+        "peak_gpu_gb": 0.01627349853515625,
+        "comm_bytes_est": 2800
+      },
+      "Ours": {
+        "t_auction_solve": 0.0013040679012192413,
+        "t_aggr_fl_weights": 0.00018286409613210708,
+        "t_local_train_proxy": 0.0007578869699500501,
+        "t_server_grad_agg": 0.0024676969624124467,
+        "peak_gpu_gb": 0.018633365631103516,
+        "comm_bytes_est": 28400,
+        "ckpt": "result/mfg_regretnet_n100_5_checkpoint.pt"
+      }
+    },
+    "200": {
+      "PAC": {
+        "t_auction_solve": 0.04741154925432056,
+        "t_aggr_fl_weights": 0.00024224539811257273,
+        "t_local_train_proxy": 0.0007844759966246784,
+        "t_server_grad_agg": 0.004851469013374299,
+        "peak_gpu_gb": 0.017260074615478516,
+        "comm_bytes_est": 5600
+      },
+      "VCG": {
+        "t_auction_solve": 0.04785350569873117,
+        "t_aggr_fl_weights": 0.00023775310546625406,
+        "t_local_train_proxy": 0.000815420993603766,
+        "t_server_grad_agg": 0.005291187029797584,
+        "peak_gpu_gb": 0.016673564910888672,
+        "comm_bytes_est": 5600
+      },
+      "CSRA": {
+        "t_auction_solve": 0.07678669300221372,
+        "t_aggr_fl_weights": 0.0002519555011531338,
+        "t_local_train_proxy": 0.0007765689515508711,
+        "t_server_grad_agg": 0.005006824037991464,
+        "peak_gpu_gb": 0.016673564910888672,
+        "comm_bytes_est": 5600
+      },
+      "MFG-Pricing": {
+        "t_auction_solve": 0.00013726994511671365,
+        "t_aggr_fl_weights": 0.0001716878527076915,
+        "t_local_train_proxy": 0.0007565580308437347,
+        "t_server_grad_agg": 0.005857297976035625,
+        "peak_gpu_gb": 0.016673564910888672,
+        "comm_bytes_est": 5600
+      }
+    },
+    "500": {
+      "PAC": {
+        "t_auction_solve": 0.13864595995109993,
+        "t_aggr_fl_weights": 0.00025937669270206245,
+        "t_local_train_proxy": 0.0007713640225119889,
+        "t_server_grad_agg": 0.012476396979764104,
+        "peak_gpu_gb": 0.017705917358398438,
+        "comm_bytes_est": 14000
+      },
+      "VCG": {
+        "t_auction_solve": 0.15772711275785695,
+        "t_aggr_fl_weights": 0.0002601352025521919,
+        "t_local_train_proxy": 0.00035530497552827,
+        "t_server_grad_agg": 0.00876942602917552,
+        "peak_gpu_gb": 0.017705917358398438,
+        "comm_bytes_est": 14000
+      },
+      "CSRA": {
+        "t_auction_solve": 0.13701047360373195,
+        "t_aggr_fl_weights": 0.00017355555028188973,
+        "t_local_train_proxy": 0.00040609698044136167,
+        "t_server_grad_agg": 0.006885048991534859,
+        "peak_gpu_gb": 0.017705917358398438,
+        "comm_bytes_est": 14000
+      },
+      "MFG-Pricing": {
+        "t_auction_solve": 5.6831492111086844e-05,
+        "t_aggr_fl_weights": 7.071360596455634e-05,
+        "t_local_train_proxy": 0.0003849170170724392,
+        "t_server_grad_agg": 0.005120036017615348,
+        "peak_gpu_gb": 0.017705917358398438,
+        "comm_bytes_est": 14000
+      }
+    }
+  },
+  "mfg_ckpts_used": {
+    "10": "result/mfg_regretnet_privacy_200_checkpoint.pt",
+    "50": "result/mfg_regretnet_n50_5_checkpoint.pt",
+    "100": "result/mfg_regretnet_n100_5_checkpoint.pt"
+  },
+  "regretnet_ckpts_used": {
+    "10": "result/regretnet_privacy_pcost_200_checkpoint.pt"
+  }
+}

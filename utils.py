@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 from cycler import cycler
 import copy
+from datasets_fl_benchmark import calc_cost_privacy_paper as _cost_privacy_paper
 
 FQ_CONVL = ["FairQuery", "ConvlAggr", "", 1]
 ALLIN_CONVL = ["All-in", "ConvlAggr", "", 1]
@@ -15,7 +16,7 @@ MREG_CONVL_NSLKDD_IID = ["M-RegretNet", "ConvlAggr", "model/8-reg_nslkdd_iid.pt"
 DM_CONVL_NSLKDD_IID = ["DM-RegretNet", "ConvlAggr", "model/dm-reg_convl_nslkdd_iid.pt", 8]
 REG_OPT_NSLKDD_IID = ["RegretNet", "OptAggr", "model/reg_nslkdd_iid.pt", 1]
 MREG_OPT_NSLKDD_IID = ["M-RegretNet", "OptAggr", "model/8-reg_nslkdd_iid.pt", 8]
-DM_OPT_NSLKDD_IID = ["DM-RegretNet", "OptAggr", "model/dm-reg_opt_nslkdd_iid", 8]
+DM_OPT_NSLKDD_IID = ["DM-RegretNet", "OptAggr", "model/dm-reg_opt_nslkdd_iid.pt", 8]
 
 
 REG_CONVL_NSLKDD_NIID = ["RegretNet", "ConvlAggr", "model/reg_nslkdd_niid.pt", 1]
@@ -108,6 +109,17 @@ TITLE_FONT = {'family': 'Times New Roman',
          'size': 18,
          }
 
+def calc_cost_privacy_paper(reports):
+    """Cost c(v, epsilon) = v * epsilon per agent. reports: (batch, n_agents, n_items+2)."""
+    return _cost_privacy_paper(reports)
+
+
+def calc_agent_util_privacy_paper(payments, reports):
+    """Agent utility u_i = p_i - c(v_i, epsilon_i). payments: (batch, n_agents); reports: (batch, n_agents, n_items+2)."""
+    cost = calc_cost_privacy_paper(reports)
+    return payments - cost
+
+
 def generate_critical_budget(reports):
     device = reports.device
     n_items = reports.shape[2] - 2
@@ -167,6 +179,8 @@ def allocs_to_plosses(allocs, pbudgets):
     items = pbudgets.view(-1, n_agents, 1).repeat(1, 1, n_items)
     items = items * frac.view(-1, 1, n_items)
     plosses = torch.sum(allocs * items, dim=2)
+    # 约束：确保分配的隐私预算不超过声称的预算
+    plosses = torch.clamp(plosses, max=pbudgets)
     return plosses
 
 
@@ -214,7 +228,11 @@ def calc_full_allocs(allocs):
     return full_allocs.view(-1, n_agents, n_items+1)
 
 
-def calc_agent_util(reports, agent_allocations, payments, instantiation=False):
+def calc_agent_util(reports, agent_allocations, payments, instantiation=False, cost_from_plosses=False, true_valuation_for_cost=None):
+    """
+    cost_from_plosses: if True and n_items==1, use privacy-paper cost c(v,eps)=v*eps with eps=allocated plosses.
+    true_valuation_for_cost: optional (batch, n_agents) or (batch, n_agents, 1); when cost_from_plosses and set, use for v in cost (e.g. true v in misreport context).
+    """
     n_batches = reports.shape[0]
     n_agents = reports.shape[1]
     n_items = reports.shape[2] - 2
@@ -226,15 +244,27 @@ def calc_agent_util(reports, agent_allocations, payments, instantiation=False):
 
     if not instantiation:
         privacy_losses = allocs_to_plosses(agent_allocations, pbudgets)
-        costs = torch.sum(agent_allocations * valuations, dim=2) * sizes
+        if cost_from_plosses and n_items == 1:
+            v_for_cost = true_valuation_for_cost if true_valuation_for_cost is not None else valuations[:, :, 0]
+            if v_for_cost.dim() == 3:
+                v_for_cost = v_for_cost.squeeze(-1)
+            costs = v_for_cost * privacy_losses
+        else:
+            costs = torch.sum(agent_allocations * valuations, dim=2) * sizes
     else:
         privacy_losses, ins_results = allocs_instantiate_plosses(agent_allocations, pbudgets)
-        zero_vals = torch.zeros(n_agents * n_batches).view(-1, 1).to(device)
-        valuations = valuations.view(-1, n_items)
-        full_vals = torch.cat((zero_vals, valuations), dim=1)
-        ins_results = ins_results.view(-1)
-        idxs = torch.arange(ins_results.shape[0])
-        costs = full_vals[idxs, ins_results].view(-1, n_agents) * sizes
+        if cost_from_plosses and n_items == 1:
+            v_for_cost = true_valuation_for_cost if true_valuation_for_cost is not None else valuations[:, :, 0]
+            if v_for_cost.dim() == 3:
+                v_for_cost = v_for_cost.squeeze(-1)
+            costs = v_for_cost * privacy_losses
+        else:
+            zero_vals = torch.zeros(n_agents * n_batches).view(-1, 1).to(device)
+            valuations_flat = valuations.view(-1, n_items)
+            full_vals = torch.cat((zero_vals, valuations_flat), dim=1)
+            ins_results = ins_results.view(-1)
+            idxs = torch.arange(ins_results.shape[0])
+            costs = full_vals[idxs, ins_results].view(-1, n_agents) * sizes
     util = payments - costs
     violations = (pbudgets - privacy_losses) < 0
     util = torch.where(violations, torch.zeros(violations.shape, device=violations.device), util)
@@ -251,16 +281,15 @@ def make_monotonic(vals, forward=True):
     return vals
 
 def optimize_misreports(
-    model, current_reports, current_misreports, budget, val_type, misreport_iter=10, lr=1e-1, train=True, instantiation=False
+    model, current_reports, current_misreports, budget, val_type, misreport_iter=10, lr=1e-1, train=True, instantiation=False, cost_from_plosses=False
 ):
-
     current_misreports.requires_grad_(True)
     true_pbudgets = current_reports[:, :, -2]
     true_sizes = current_reports[:, :, -1]
 
     for i in range(misreport_iter):
         model.zero_grad()
-        agent_utils = tiled_misreport_util(current_misreports, current_reports, model, budget, val_type, instantiation=instantiation)
+        agent_utils = tiled_misreport_util(current_misreports, current_reports, model, budget, val_type, instantiation=instantiation, cost_from_plosses=cost_from_plosses)
 
         (misreports_grad,) = torch.autograd.grad(agent_utils.sum(), current_misreports)
         misreports_grad = torch.where(torch.isnan(misreports_grad), torch.full_like(misreports_grad, 0), misreports_grad)
@@ -308,9 +337,10 @@ def create_real_reports(misreports, val_type):
 
     return real_reports
 
-def tiled_misreport_util(current_misreports, current_reports, model, budget, val_type, instantiation=False):
+def tiled_misreport_util(current_misreports, current_reports, model, budget, val_type, instantiation=False, cost_from_plosses=False):
     n_agents = current_reports.shape[1]
     n_items = current_reports.shape[2] - 2
+    batch_size = current_reports.shape[0]
 
     agent_idx = list(range(n_agents))
     tiled_misreports = create_combined_misreports(
@@ -324,14 +354,23 @@ def tiled_misreport_util(current_misreports, current_reports, model, budget, val
     )
     reshaped_allocations = allocations.view(-1, n_agents, n_agents, n_items)
     agent_payments = reshaped_payments[:, agent_idx, agent_idx]
-    agent_allocations = reshaped_allocations[:, agent_idx, agent_idx, :]
+    agent_payments = agent_payments.repeat_interleave(n_agents, dim=0)
+    # For each (batch, deviating_agent) we need the full (n_agents, n_items) allocation so batch dim = batch_size * n_agents to match real_reports
+    agent_allocations = reshaped_allocations.view(batch_size * n_agents, n_agents, n_items)
     real_reports = create_real_reports(current_misreports, val_type)
+    # Match batch dim to agent_allocations (batch_size * n_agents, n_agents, ...)
+    real_reports = real_reports.repeat_interleave(n_agents, dim=0)
+    true_valuation_for_cost = None
+    if cost_from_plosses and n_items == 1:
+        true_valuation_for_cost = current_reports[:, :, 0].repeat_interleave(n_agents, dim=0)
     agent_utils = calc_agent_util(
-        real_reports, agent_allocations, agent_payments, instantiation=instantiation
+        real_reports, agent_allocations, agent_payments, instantiation=instantiation,
+        cost_from_plosses=cost_from_plosses, true_valuation_for_cost=true_valuation_for_cost
     )
-    # agent_utils = calc_agent_util(
-    #     current_reports, agent_allocations, agent_payments, instantiation=instantiation
-    # )
+    # agent_utils is (batch_size * n_agents, n_agents); for train_loop we need (batch_size, n_agents): utility of deviating agent per (batch, agent)
+    # row i = b*10+a gives utilities when agent a deviated; we need agent_utils[i, a] -> index (i, i % n_agents)
+    i = torch.arange(batch_size * n_agents, device=agent_utils.device)
+    agent_utils = agent_utils[i, i % n_agents].view(batch_size, n_agents)
     return agent_utils
 
 

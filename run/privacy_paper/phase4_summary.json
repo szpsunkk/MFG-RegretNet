@@ -1,0 +1,96 @@
+{
+  "n_agents": 10,
+  "budget": 50.0,
+  "seeds": [
+    42,
+    43,
+    44
+  ],
+  "rq1": [
+    {
+      "mechanism": "PAC",
+      "mean_regret": 0.0,
+      "mean_ir_violation": 0.0
+    },
+    {
+      "mechanism": "VCG",
+      "mean_regret": 0.0,
+      "mean_ir_violation": 0.0
+    },
+    {
+      "mechanism": "CSRA",
+      "mean_regret": 0.0,
+      "mean_ir_violation": 0.0
+    }
+  ],
+  "rq2": [
+    {
+      "n_agents": 10,
+      "mechanism": "PAC",
+      "mean_time_sec": 0.001152160334944104
+    },
+    {
+      "n_agents": 10,
+      "mechanism": "VCG",
+      "mean_time_sec": 0.001081917677462722
+    },
+    {
+      "n_agents": 10,
+      "mechanism": "CSRA",
+      "mean_time_sec": 0.004274897325861578
+    },
+    {
+      "n_agents": 50,
+      "mechanism": "PAC",
+      "mean_time_sec": 0.002167440669533486
+    },
+    {
+      "n_agents": 50,
+      "mechanism": "VCG",
+      "mean_time_sec": 0.0024038196618979177
+    },
+    {
+      "n_agents": 50,
+      "mechanism": "CSRA",
+      "mean_time_sec": 0.013805904338369146
+    },
+    {
+      "n_agents": 100,
+      "mechanism": "PAC",
+      "mean_time_sec": 0.003546147335631152
+    },
+    {
+      "n_agents": 100,
+      "mechanism": "VCG",
+      "mean_time_sec": 0.004132267000386491
+    },
+    {
+      "n_agents": 100,
+      "mechanism": "CSRA",
+      "mean_time_sec": 0.02498908166307956
+    }
+  ],
+  "rq3": [
+    {
+      "mechanism": "PAC",
+      "mean_revenue": 8.178877830505371,
+      "bf_rate": 1.0,
+      "revenue_efficiency": 0.16357755661010742,
+      "mean_social_welfare": 4.0789594650268555
+    },
+    {
+      "mechanism": "VCG",
+      "mean_revenue": 8.178877830505371,
+      "bf_rate": 1.0,
+      "revenue_efficiency": 0.16357755661010742,
+      "mean_social_welfare": 4.0789594650268555
+    },
+    {
+      "mechanism": "CSRA",
+      "mean_revenue": 31.909542083740234,
+      "bf_rate": 1.0,
+      "revenue_efficiency": 0.6381908655166626,
+      "mean_social_welfare": 29.60016632080078
+    }
+  ]
+}

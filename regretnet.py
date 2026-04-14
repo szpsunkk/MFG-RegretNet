@@ -8,6 +8,21 @@ import json
 from aggregation import error_bound_by_allocs_batch as calc_error_bound
 from utils import *
 
+class View(nn.Module):
+    def __init__(self, shape):
+        super(View, self).__init__()
+        self.shape = shape
+
+    def forward(self, x):
+        return x.view(*self.shape)
+
+
+class View_Cut(nn.Module):
+    def __init__(self):
+        super(View_Cut, self).__init__()
+
+    def forward(self, x):
+        return x[:, :-1, :]
 
 class RegretNet(nn.Module):
     def __init__(self, n_agents, n_items, hidden_layer_size=128, clamp_op=None, n_hidden_layers=2,
@@ -104,8 +119,8 @@ class RegretNet(nn.Module):
         else:
             norm_input = input
 
-        norm_input[torch.isnan(norm_input)] = 0.0
-        norm_input[torch.isinf(norm_input)] = 0.0
+        # norm_input[torch.isnan(norm_input)] = 0.0
+        # norm_input[torch.isinf(norm_input)] = 0.0
         return norm_input
 
     def forward(self, input):
@@ -181,12 +196,113 @@ class RegretNet(nn.Module):
 
         return allocs, payments
 
+def _mfg_clamp_min_zero(x):
+    """Clamp tensor in-place to non-negative; used as default clamp_op for MFGRegretNet (must be module-level for pickle)."""
+    x.clamp_min_(0.0)
+
+
+def budget_projection_privacy_paper(payments, budget):
+    """
+    Budget projection (paper eq. 49): p_bar_i = p_i / max(1, (1/B)*sum_i' p_i').
+    payments: (batch, n_agents), budget: (batch, 1).
+    Ensures sum_i p_bar_i <= B.
+    """
+    total = payments.sum(dim=1, keepdim=True).clamp(min=1e-12)
+    scale = (budget / total).clamp(max=1.0)
+    return payments * scale
+
+
+class MFGRegretNet(nn.Module):
+    """
+    MFG-RegretNet aligned with privacy paper: input [b_1..b_N; b_MFG], b_MFG = (1/N)*sum_i b_i (eq.50),
+    budget projection on payments (eq.49). Accepts (reports, budget) like RegretNet.
+    """
+    def __init__(self, n_agents, n_items, hidden_layer_size=128, clamp_op=None, n_hidden_layers=2,
+                 activation='tanh', separate=False):
+        super(MFGRegretNet, self).__init__()
+
+        self.activation = activation
+        if activation == 'tanh':
+            self.act = nn.Tanh
+        else:
+            self.act = nn.ReLU
+
+        if clamp_op is None:
+            self.clamp_op = _mfg_clamp_min_zero
+            self.clamp_opt = _mfg_clamp_min_zero
+        else:
+            self.clamp_op = clamp_op
+            self.clamp_opt = clamp_op
+        self.deter_train = True
+        self.n_agents = n_agents
+        self.n_items = n_items
+        # Input: [reports (N*(n_items+2)), b_MFG broadcast per agent (N*(n_items+2)), budget (1)]
+        self.input_size = self.n_agents * (self.n_items + 2) * 2 + 1
+        self.hidden_layer_size = hidden_layer_size
+        self.n_hidden_layers = n_hidden_layers
+        self.separate = separate
+
+        self.allocations_size = (self.n_agents) * (self.n_items + 1)  # same as RegretNet: (N, n_items+1) then View_Cut
+        self.payments_size = self.n_agents
+
+        # Same as RegretNet: (batch, n_agents, n_items+1) then cut last column -> (batch, n_agents, n_items)
+        self.allocation_head = [nn.Linear(self.hidden_layer_size, self.allocations_size),
+                                View((-1, self.n_agents, self.n_items + 1)),
+                                nn.Softmax(dim=2),
+                                ibp.View_Cut()]
+
+        self.payment_head = [
+            nn.Linear(self.hidden_layer_size, self.payments_size), nn.Sigmoid()
+        ]
+
+        if separate:
+            self.nn_model = nn.Sequential()
+            self.payment_head = [nn.Linear(self.input_size, self.hidden_layer_size), self.act()] + \
+                                [l for _ in range(n_hidden_layers)
+                                 for l in (nn.Linear(self.hidden_layer_size, self.hidden_layer_size), self.act())] + \
+                                self.payment_head
+            self.payment_head = nn.Sequential(*self.payment_head)
+            self.allocation_head = [nn.Linear(self.input_size, self.hidden_layer_size), self.act()] + \
+                                   [l for _ in range(n_hidden_layers)
+                                    for l in (nn.Linear(self.hidden_layer_size, self.hidden_layer_size), self.act())] + \
+                                   self.allocation_head
+            self.allocation_head = nn.Sequential(*self.allocation_head)
+        else:
+            self.nn_model = nn.Sequential(
+                *([nn.Linear(self.input_size, self.hidden_layer_size), self.act()] +
+                  [l for _ in range(self.n_hidden_layers)
+                   for l in (nn.Linear(self.hidden_layer_size, self.hidden_layer_size), self.act())])
+            )
+            self.allocation_head = nn.Sequential(*self.allocation_head)
+            self.payment_head = nn.Sequential(*self.payment_head)
+
+    def glorot_init(self):
+        def initialize_fn(layer):
+            if type(layer) == nn.Linear:
+                torch.nn.init.xavier_uniform_(layer.weight)
+        self.apply(initialize_fn)
+
+    def forward(self, input):
+        reports = input[0].reshape(-1, self.n_agents, self.n_items + 2)
+        budget = input[1].reshape(-1, 1)
+        # b_MFG = (1/N)*sum_i b_i (eq.50), mean over agents
+        b_mfg = reports.mean(dim=1, keepdim=True)  # (batch, 1, n_items+2)
+        b_mfg_broadcast = b_mfg.repeat(1, self.n_agents, 1)  # (batch, n_agents, n_items+2)
+        x_reports = reports.reshape(-1, self.n_agents * (self.n_items + 2))
+        x_b_mfg = b_mfg_broadcast.reshape(-1, self.n_agents * (self.n_items + 2))
+        x = torch.cat([x_reports, x_b_mfg, budget], dim=1)
+        x = self.nn_model(x)
+        allocs = self.allocation_head(x)
+        # Raw payments in [0,1]^N, scale by budget then project (eq.49)
+        payments_raw = self.payment_head(x) * budget
+        payments = budget_projection_privacy_paper(payments_raw, budget)
+        return allocs, payments
 
 def test_loop(
     model,
     loader,
     args,
-    device='cpu'
+    device='cuda'
 ):
     model.eval()
     model.module.deter_train = False
@@ -228,20 +344,24 @@ def test_loop(
         # budget_rate = (torch.rand(critical_budget.shape).to(device) * (0.01 - 1.) + 1.)
         # budget = critical_budget * budget_rate
 
-        budget = (batch[:, :, -3].view(-1, args.n_agents) * sizes).sum(dim=1).view(-1, 1)
-        budget_rate = (torch.rand(budget.shape).to(device) * (args.min_budget_rate - args.max_budget_rate) + args.max_budget_rate)
-        budget = budget * budget_rate
-
-
-        misreport_batch = batch.clone().detach()
+        fixed_budget = float(getattr(args, 'fixed_budget', 0.0) or 0.0)
+        if fixed_budget > 0:
+            budget = fixed_budget * torch.ones(batch.shape[0], 1, device=device)
+        else:
+            budget = (batch[:, :, -3].view(-1, args.n_agents) * sizes).sum(dim=1).view(-1, 1)
+            budget_rate = (torch.rand(budget.shape).to(device) * (args.min_budget_rate - args.max_budget_rate) + args.max_budget_rate)
+            budget = budget * budget_rate
         n_count += batch.shape[0]
 
-        optimize_misreports(model, batch, misreport_batch, budget, val_type, misreport_iter=args.test_misreport_iter, lr=args.misreport_lr)
+        misreport_batch = batch.clone().detach()
+        cost_from_plosses = (isinstance(model.module, MFGRegretNet) and args.n_items == 1) or \
+                             (getattr(args, 'privacy_cost', False) and args.n_items == 1)
+        optimize_misreports(model, batch, misreport_batch, budget, val_type, misreport_iter=args.test_misreport_iter, lr=args.misreport_lr, cost_from_plosses=cost_from_plosses)
 
         allocs, payments = model((batch, budget))
 
-        truthful_util = calc_agent_util(batch, allocs, payments, instantiation=True)
-        misreport_util = tiled_misreport_util(misreport_batch, batch, model, budget, val_type, instantiation=True)
+        truthful_util = calc_agent_util(batch, allocs, payments, instantiation=True, cost_from_plosses=cost_from_plosses)
+        misreport_util = tiled_misreport_util(misreport_batch, batch, model, budget, val_type, instantiation=True, cost_from_plosses=cost_from_plosses)
 
         pbudgets = batch[:, :, -2].view(-1, args.n_agents)
         errors = calc_error_bound(allocs, pbudgets, sizes, args.L, method=args.aggr_method)
@@ -321,7 +441,7 @@ def train_loop(
     train_loader,
     test_loader,
     args,
-    device="cpu",
+    device="cuda",
     writer=None
 ):
     model.train()
@@ -334,7 +454,8 @@ def train_loop(
     bc_lagr_mult = args.bc_lagr_mult
     deter_lagr_mults = args.deter_lagr_mult * torch.ones((1, n_agents)).to(device)
 
-    optimizer = optim.Adam(model.parameters(), lr=args.model_lr)
+    # optimizer = optim.Adam(model.parameters(), lr=args.model_lr)
+    optimizer = optim.SGD(model.parameters(), lr=args.model_lr)
 
 
     iter=0
@@ -364,18 +485,30 @@ def train_loop(
             # critical_budget = generate_critical_budget(batch)
             # budget_rate = (torch.rand(critical_budget.shape).to(device) * (0.01 - 1.) + 1.)
             # budget = critical_budget * budget_rate
-            budget = (batch[:, :, -3].view(-1, args.n_agents) * sizes).sum(dim=1).view(-1, 1)
-            budget_rate = (torch.rand(budget.shape).to(device) * (args.min_budget_rate - args.max_budget_rate) + args.max_budget_rate)
-            budget = budget * budget_rate
+            fixed_budget = float(getattr(args, 'fixed_budget', 0.0) or 0.0)
+            if fixed_budget > 0:
+                # Use fixed budget (privacy paper: B=50), with small random perturbation for generalization
+                budget_noise = 1.0 + 0.1 * (torch.rand(batch.shape[0], 1, device=device) * 2 - 1)
+                budget = fixed_budget * budget_noise
+            else:
+                budget = (batch[:, :, -3].view(-1, args.n_agents) * sizes).sum(dim=1).view(-1, 1)
+                budget_rate = (torch.rand(budget.shape).to(device) * (args.min_budget_rate - args.max_budget_rate) + args.max_budget_rate)
+                budget = budget * budget_rate
             pbudgets = batch[:, :, -2].view(-1, args.n_agents)
 
-            optimize_misreports(model, batch, misreport_batch, budget, val_type, misreport_iter=args.misreport_iter, lr=args.misreport_lr)
+            cost_from_plosses = (isinstance(model.module, MFGRegretNet) and args.n_items == 1) or \
+                                 (getattr(args, 'privacy_cost', False) and args.n_items == 1)
+            optimize_misreports(model, batch, misreport_batch, budget, val_type, misreport_iter=args.misreport_iter, lr=args.misreport_lr, cost_from_plosses=cost_from_plosses)
             # print(batch)
             allocs, payments = model((batch, budget))
 
-            truthful_util = calc_agent_util(batch, allocs, payments)
-            misreport_util = tiled_misreport_util(misreport_batch, batch, model, budget, val_type)
-            costs = torch.sum(allocs * batch[:, :, :-2], dim=2) * sizes
+            truthful_util = calc_agent_util(batch, allocs, payments, cost_from_plosses=cost_from_plosses)
+            misreport_util = tiled_misreport_util(misreport_batch, batch, model, budget, val_type, cost_from_plosses=cost_from_plosses)
+            plosses = allocs_to_plosses(allocs, pbudgets)
+            if cost_from_plosses and args.n_items == 1:
+                costs = batch[:, :, 0] * plosses
+            else:
+                costs = torch.sum(allocs * batch[:, :, :-2], dim=2) * sizes
 
             regrets = misreport_util - truthful_util
             positive_regrets = torch.clamp_min(regrets, 0)
@@ -388,8 +521,6 @@ def train_loop(
 
             #calculate losses
             errors = calc_error_bound(allocs, pbudgets, sizes, args.L, method=args.aggr_method)
-            # total_plosses = allocs_to_plosses(allocs, pbudgets).sum(dim=1)
-            plosses = allocs_to_plosses(allocs, pbudgets)
             weighted_plosses = (plosses * sizes) / sizes.mean(dim=1, keepdims=True)
             # weighted_pbudgets = pbudgets * sizes
 
@@ -468,7 +599,7 @@ def train_loop(
                 ir_quad_loss = (rho_ir / 2.0) * (ir_violation ** 2).mean()
                 deter_loss = (deter_lagr_mults * deter_violation).mean()
                 deter_quad_loss = (rho_deter / 2.0) * (deter_violation ** 2).mean()
-
+            
 
             if i % print_step == print_step - 1:
                 print("\n------------------------------------------------------------------")
@@ -509,11 +640,34 @@ def train_loop(
                 print("weighted privacy loss")
                 print(weighted_plosses.sum(dim=1).mean())
                 print("------------------------------------------------------------------")
+                writer.add_scalar(f"epoch/{epoch}/error_loss", error_loss.item(), global_step=i)
+                writer.add_scalar(f"epoch/{epoch}/regret violation", positive_regrets.mean().item(), global_step=i)
+                writer.add_scalar(f"epoch/{epoch}/ir violation", ir_violation.mean().item(), global_step=i)
+                writer.add_scalar(f"epoch/{epoch}/regret violation perc. (utility)", (positive_regrets / truthful_util.abs()).mean().item(), global_step=i)
+                writer.add_scalar(f"epoch/{epoch}/regret violation perc. (cost)", (positive_regrets.mean() / costs.mean()).item(), global_step=i)
+                writer.add_scalar(f"epoch/{epoch}/regret violation perc. (payment)", (positive_regrets.mean() / payments.mean()).item(), global_step=i)
+                writer.add_scalar(f"epoch/{epoch}/privacy loss", (plosses.sum(dim=1).mean()).item(), global_step=i)
+                writer.add_scalar(f"epoch/{epoch}/weighted privacy loss", (weighted_plosses.sum(dim=1).mean()).item(), global_step=i)
+                
 
-            if args.a_activation == 'deterministic':
+            a_activation = getattr(args, 'a_activation', 'softmax')
+            if a_activation == 'deterministic':
                 loss_func = error_loss + regret_loss + regret_quad_loss + ir_loss + ir_quad_loss + deter_loss + deter_quad_loss
             else:
-                loss_func = -weighted_plosses.mean() + regret_loss + regret_quad_loss + ir_loss + ir_quad_loss
+                # loss_func = -weighted_plosses.mean() + regret_loss + regret_quad_loss + ir_loss + ir_quad_loss
+                loss_func = -weighted_plosses.mean() + regret_loss + ir_loss
+            # RQ3-oriented optional terms (MFG-RegretNet only): budget use & participant welfare W≈sum_i u_i
+            lam_r = float(getattr(args, "lambda_revenue_util", 0.0) or 0.0)
+            lam_w = float(getattr(args, "lambda_participant_welfare", 0.0) or 0.0)
+            if (lam_r > 0 or lam_w > 0) and isinstance(model.module, MFGRegretNet):
+                if lam_r > 0:
+                    br = budget.view(-1).clamp(min=1e-4)
+                    pay_ratio = (payments.sum(dim=1) / br).clamp(max=5.0)
+                    loss_func = loss_func - lam_r * pay_ratio.mean()
+                if lam_w > 0:
+                    # sum_i (p_i - v_i * eps_alloc) per sample ≈ participant-side welfare
+                    W_batch = truthful_util.sum(dim=1).mean()
+                    loss_func = loss_func - lam_w * W_batch
 
 
             if torch.isnan(loss_func).sum() > 0.0:
@@ -527,7 +681,7 @@ def train_loop(
                 print(loss_func)
 
 
-            #update model
+            # update model
             optimizer.zero_grad()
             loss_func.backward()
 
@@ -553,7 +707,7 @@ def train_loop(
             else:
                 optimizer.step()
 
-            #update various fancy multipliers
+            # update various fancy multipliers
             if args.normalized_loss == 2:
                 if iter % lagr_update_iter_regret == 0:
                     with torch.no_grad():
@@ -642,30 +796,34 @@ def train_loop(
         if epoch % args.rho_incr_epoch_deter == 0:
             rho_deter += args.rho_incr_amount_deter
 
-        if epoch % 10 == 9:
-            if test_loader:
+        # Save checkpoint every 10 epochs or always on the last epoch (so short runs like 5 epochs still get a checkpoint)
+        if epoch % 10 == 9 or epoch == args.num_epochs - 1:
+            if test_loader and epoch % 10 == 9:
                 test_result = test_loop(model, test_loader, args, device=device)
                 print(f"Epoch {str(epoch)}")
                 print(json.dumps(test_result, indent=4, sort_keys=True))
 
-                for key, value in test_result.items():
-                    writer.add_scalar(f"test/stat/{key}", value, global_step=epoch)
-            arch = {'n_agents': model.module.n_agents,
-                    'n_items': model.module.n_items,
-                    'hidden_layer_size': model.module.hidden_layer_size,
-                    'n_hidden_layers': model.module.n_hidden_layers,
-                    'clamp_op': model.module.clamp_opt,
-                    'activation': model.module.activation,
-                    'p_activation': model.module.p_activation,
-                    'a_activation': model.module.a_activation,
-                    'separate': model.module.separate,
-                    "normalized_input": model.module.normalized_input}
+                # for key, value in test_result.items():
+                #     writer.add_scalar(f"test/stat/{key}", value, global_step=epoch)
+            m = model.module
+            is_mfg = isinstance(m, MFGRegretNet)
+            arch = {'n_agents': m.n_agents, 'n_items': m.n_items,
+                    'hidden_layer_size': m.hidden_layer_size, 'n_hidden_layers': m.n_hidden_layers,
+                    'clamp_op': getattr(m, 'clamp_opt', getattr(m, 'clamp_op', None)),
+                    'activation': m.activation, 'separate': m.separate}
+            if not is_mfg:
+                arch['p_activation'] = m.p_activation
+                arch['a_activation'] = m.a_activation
+                arch['normalized_input'] = getattr(m, 'normalized_input', -1)
+            else:
+                arch['model_type'] = 'MFGRegretNet'
+            ckpt_path = f"result/{args.name}_{epoch+1}_checkpoint.pt"
             torch.save({'name': args.name,
                         'arch': arch,
                         'state_dict': model.cpu().state_dict(),
                         'args': args}
-                       , f"result/{args.name}_{epoch+1}_checkpoint.pt")
-
+                       , ckpt_path)
+            print("Saved checkpoint:", ckpt_path)
             model = model.to(device)
 
 

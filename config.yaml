@@ -1,0 +1,39 @@
+# 实验思路 实验配置（对应 实验思路.md Section 5）
+
+# 数据集
+datasets:
+  default_agents: 10
+  num_profiles: 1000
+  seeds: [42, 43, 44]
+  n_list_rq2: [10, 50, 100]   # 可扩展性 N
+
+# 隐私与预算
+privacy:
+  valuation_range: [0.0, 1.0]
+  epsilon_range: [0.1, 5.0]
+  budget: 50.0
+  cost_form: "v * epsilon"
+
+# 网络与训练（MFG-RegretNet）
+training:
+  outer_iterations: 200
+  inner_steps: 25
+  batch_size: 64
+  pga_steps: 25
+  adam_lr: 0.001
+  pga_step_size: 0.01
+  hidden_layers: 3
+  hidden_units: 100
+
+# 实验
+experiments:
+  num_seeds: 3
+  significance_level: 0.05
+  confidence_level: 0.95
+  out_dir: run/privacy_paper
+
+# Checkpoint 路径（运行前需先训练或修改为实际路径）
+checkpoints:
+  regretnet: ""   # result/regretnet_n10_200_checkpoint.pt
+  mfg_regretnet: ""  # result/mfg_regretnet_n10_200_checkpoint.pt
+  mfg_by_n: ""    # "10:result/mfg_n10.pt,50:result/mfg_n50.pt,100:result/mfg_n100.pt"

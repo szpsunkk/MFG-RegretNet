@@ -1,0 +1,9 @@
+/home/skk/anaconda3/lib/python3.8/site-packages/pandas/core/computation/expressions.py:20: UserWarning: Pandas requires version '2.7.3' or newer of 'numexpr' (version '2.7.1' currently installed).
+  from pandas.core.computation.check import NUMEXPR_INSTALLED
+/home/skk/anaconda3/lib/python3.8/site-packages/setuptools/distutils_patch.py:25: UserWarning: Distutils was imported before Setuptools. This usage is discouraged and may exhibit undesirable behaviors or errors. Please use Setuptools' objects directly or at least import Setuptools first.
+  warnings.warn(
+exp_rq/rq1_paper_table_figures.py:509: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+  fig.tight_layout()
+Wrote run/privacy_paper/rq1/figure_rq1_paper_regret.png
+Wrote run/privacy_paper/rq1/figure_rq1_paper_ir.png
+RQ1 paper table/figures done -> run/privacy_paper/rq1
