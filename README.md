@@ -1,18 +1,6 @@
-# FL-Market
 
-Code, data, and models for two related papers on privacy-aware federated learning marketplaces.
 
----
-
-## Papers
-
-### 1. FL-Market: Trading Private Models in Federated Learning
-**IEEE BigData 2022**
-
-- IEEE Xplore: https://ieeexplore.ieee.org/document/10020232
-- arXiv: https://arxiv.org/abs/2106.04384
-
-### 2. Privacy as Commodity: MFG-RegretNet for Privacy-Aware Auctions
+# Privacy as Commodity: MFG-RegretNet for Privacy-Aware Auctions
 See `main_m.pdf` for the full paper.
 
 ---
@@ -150,10 +138,10 @@ Pre-trained models are in `model/`. Datasets are in `data/`.
 If you use this code, please cite:
 
 ```bibtex
-@inproceedings{flmarket2022,
-  title     = {FL-Market: Trading Private Models in Federated Learning},
-  booktitle = {IEEE International Conference on Big Data (BigData)},
-  year      = {2022},
-  doi       = {10.1109/BigData55660.2022.10020232}
+@article{sun2026privacy,
+  title={Privacy as Commodity: MFG-RegretNet for Large-Scale Privacy Trading in Federated Learning},
+  author={Sun, Kangkang and Li, Jianhua and Chen, Xiuzhen and Meng, Weizhi and Guo, Minyi},
+  journal={arXiv preprint arXiv:2603.28329},
+  year={2026}
 }
 ```
