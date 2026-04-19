@@ -22,6 +22,10 @@ nohup.out
 # TensorBoard
 events.out.tfevents.*
 
+# Generated outputs (run results & checkpoints)
+run/
+result/
+
 # OS
 .DS_Store
 Thumbs.db
