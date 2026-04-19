@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+
+# Logs & outputs
+nohup.out
+*.log
+*.out
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# TensorBoard
+events.out.tfevents.*
+
+# OS
+.DS_Store
+Thumbs.db
