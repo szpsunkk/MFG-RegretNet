@@ -104,7 +104,7 @@ See `RUN_EXPERIMENTS.md` and `QUICK_REFERENCE.md` for full CLI options.
 
 ---
 
-## Reproducing Results (FL-Market Paper)
+## Reproducing Results
 
 ```bash
 # Reproduce Figure 9 (error bounds)
