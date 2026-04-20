@@ -26,6 +26,10 @@ events.out.tfevents.*
 run/
 result/
 
+# Large datasets (too big for GitHub)
+data/nslkdd/
+data/cifar10/cifar-10-python.tar.gz
+
 # OS
 .DS_Store
 Thumbs.db
