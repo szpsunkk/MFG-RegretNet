@@ -1,0 +1,8 @@
+name = "privacy-as-commodity"
+pages_build_output_dir = "site"
+compatibility_date = "2026-10-21"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "privacy-commodity-auctions"
+database_id = "00000000-0000-0000-0000-000000000000" # Replace with your own D1 database ID.

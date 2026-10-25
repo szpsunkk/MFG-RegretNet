@@ -1,0 +1,17 @@
+{
+  "seeds": {
+    "0.1": [
+      24,
+      25
+    ],
+    "0.5": [
+      24,
+      25
+    ]
+  },
+  "block_b_arm": {
+    "0.5": "CSRA",
+    "0.1": "CSRA"
+  },
+  "block_c_arm": "CSRA-declared"
+}

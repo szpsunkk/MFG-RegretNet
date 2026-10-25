@@ -1,147 +1,123 @@
+# Privacy as Commodity
 
+Research code and a deployed, multi-user demonstration of **MFG-RegretNet** for privacy procurement in federated learning.
 
-# Privacy as Commodity: MFG-RegretNet for Privacy-Aware Auctions
-See `main_m.pdf` for the full paper.
+**[Open the platform](https://privacy-as-commodity.pages.dev/)** ·
+**[Compare algorithms](https://privacy-as-commodity.pages.dev/results)** ·
+**[Join an auction](https://privacy-as-commodity.pages.dev/auction)** ·
+**[Paper and supplement](https://privacy-as-commodity.pages.dev/paper)**
 
----
+This repository accompanies *Dependable and Secure Privacy Trading in Federated Learning via MFG-RegretNet* by Kangkang Sun, Jianhua Li, Xiuzhen Chen, Weizhi Meng and Minyi Guo. The October 25, 2026 release contains the frozen **P2-v2 / QV-sel** implementation and evidence used in the current manuscript. Earlier implementations remain available at the repository root; use [`reproducibility/`](reproducibility/README.md) for the current results.
 
-## Repository Structure
+## What the project does
 
-```
-FL-Market/
-├── Core FL & Auction Code
-│   ├── FL.py                    # Federated learning core
-│   ├── client.py                # FL client
-│   ├── aggregation.py           # Aggregation algorithms
-│   ├── experiments.py           # Experiment runner
-│   ├── regretnet.py             # RegretNet architecture
-│   ├── ibp.py                   # Interval bound propagation
-│   ├── singleminded.py          # Single-minded auction utilities
-│   ├── datasets.py              # Dataset loaders (FL-Market)
-│   ├── datasets_fl_benchmark.py # Dataset loaders (privacy paper)
-│   └── utils.py                 # Shared utilities
-│
-├── baselines/                   # Baseline auction mechanisms
-│   ├── pac.py                   # PAC mechanism
-│   ├── vcg.py                   # VCG mechanism
-│   ├── csra.py                  # CSRA mechanism
-│   └── mfg_pricing.py           # MFG pricing baseline
-│
-├── exp_rq/                      # Per-RQ experiment scripts (privacy paper)
-│   ├── rq1_incentive_compatibility.py
-│   ├── rq2_paper_benchmark.py
-│   ├── rq3_paper_complete.py
-│   ├── rq4_fl_convergence.py
-│   ├── rq5_privacy_utility.py
-│   ├── rq6_robustness.py
-│   └── ablation_study.py
-│
-├── scripts/                     # Shell scripts to reproduce paper figures
-├── docs/                        # Detailed experiment design docs
-├── data/                        # Datasets (MNIST, CIFAR-10, Bank, NSL-KDD)
-├── model/                       # Pre-trained RegretNet checkpoints
-├── result/                      # Pre-computed experiment results
-├── config.yaml                  # Experiment hyperparameters
-└── main_m.pdf                   # Privacy paper
-```
+An institution can contribute to a shared model while limiting its privacy exposure. A coordinator has a finite procurement budget. MFG-RegretNet conditions the purchase on reported costs, privacy capacities, verified data sizes and a learned population embedding, then assigns privacy budgets and compensation.
 
----
+The current implementation uses a monotone total-purchase network, a calibrated QV-sel participation rule, capped allocation, numerical integral payments and a data dividend. The accompanying DP-SGD experiments evaluate the resulting allocations with client privacy accounting. The population embedding is a mechanism input; it is not, by itself, a computed dynamic Nash equilibrium.
 
-## Installation
+## A working public platform
+
+[Privacy as Commodity](https://privacy-as-commodity.pages.dev/) is deployed on **Cloudflare Pages with server-side computation and D1 persistence**. It operates independently of the authors' computers or private network.
+
+| Page | What a reviewer can explore |
+| --- | --- |
+| [Results](https://privacy-as-commodity.pages.dev/results) | MNIST/CIFAR-10 comparisons, fixed-budget and matched-purchased-privacy settings, seed variation, privacy and secure computation costs |
+| [Method](https://privacy-as-commodity.pages.dev/method) | Registration, population representation, allocation, payment and settlement |
+| [Baselines](https://privacy-as-commodity.pages.dev/baselines) | Individual explanations of the comparison mechanisms |
+| [Live auction](https://privacy-as-commodity.pages.dev/auction) | Shared rooms for 2–10 participants, private bids, contracts and visible rewards |
+| [Resources](https://privacy-as-commodity.pages.dev/paper) | Manuscript, supplement, downloadable data and provenance |
+
+To try the auction, create a room and share its invite link. Participants register an institution and a synthetic record count; the host verifies registration and opens bidding. Each participant submits a cost and privacy capacity. The server applies the frozen mechanism, issues a contract, and records demo credits after acceptance. Rejection settles to zero. Receipts can be downloaded, and repeat acceptance cannot credit twice.
+
+This demonstrates an implemented path from the paper's mechanism to persistent, multi-user procurement and settlement. The application scenario is **cross-institution intrusion detection**; the reported model-accuracy experiments use MNIST and CIFAR-10. Rewards are demo credits. Connecting real institutions requires identity verification, a client DP/FL agent, verified release evidence, cumulative privacy ledgers and a payment connector. The web service processes bids on the server over HTTPS; its execution is separate from the paper's SMPC benchmark.
+
+The [platform source and deployment guide](platform/README.md) are included. A [Chinese walkthrough](platform/GUIDE_zh.md) explains a demonstration using two devices.
+
+## Reproduce the current paper
+
+The release includes original result JSON, allocation specifications and cumulative privacy ledgers for **880 completed runs**, the frozen checkpoints and threshold table, numerical implementations, experiment drivers, and plotting code. SHA-256 manifests connect the release to the original artifacts.
 
 ```bash
-pip install torch torchvision numpy cvxpy matplotlib
+git clone https://github.com/szpsunkk/MFG-RegretNet.git
+cd MFG-RegretNet
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r reproducibility/requirements.txt
+
+# Verify files and reconstruct endpoints, privacy statistics and tables.
+python reproducibility/reproduce.py verify
+python reproducibility/reproduce.py tables
+python reproducibility/reproduce_control.py
+
+# Recreate the main/supplementary RQ4 curves and RQ1–RQ3 plot assets.
+python reproducibility/reproduce.py figures
+
+# Check original-selector parity, budget feasibility and payment invariants.
+python reproducibility/test_release.py
 ```
 
-- Python 3.6+
-- `cvxpy` is required for Phase 2/4/5 and all auction experiments
-- `matplotlib` is required for figure generation
+Outputs go to `reproducibility/outputs/`. These commands recompute saved experimental evidence; they do not retrain 880 FL runs. The [reproduction guide](reproducibility/README.md) provides separate commands for model training, FL reruns, attacks, scalability and SMPC. It also documents the historical scripts and portability adapters.
 
----
-
-## Reproducing Results (Privacy Paper — MFG-RegretNet)
-
-### Quick Test (30–60 min)
-```bash
-QUICK=1 bash run_all_rq.sh
-```
-
-### Full Reproduction (~6–10 hours)
-
-**Step 1 — Train models:**
-```bash
-# MFG-RegretNet (required for RQ1/2/3)
-python train_mfg_regretnet.py --num-epochs 200 --num-examples 102400 --n-agents 10
-
-# RegretNet and DM-RegretNet (RQ1 comparison)
-python train_regretnet_privacy.py --num-epochs 200 --n-agents 10
-python train_dm_regretnet_privacy.py --num-epochs 200 --n-agents 10
-```
-
-**Step 2 — Run all RQs:**
-```bash
-bash run_all_rq.sh
-```
-
-**Step 3 — View results:**
-```bash
-ls run/privacy_paper/*/figures/*.png   # figures
-ls run/privacy_paper/*/table_*.md      # tables
-```
-
-### Individual RQs
-
-| RQ | Description | Command |
-|----|-------------|---------|
-| RQ1 | Incentive compatibility (regret/IR) | `bash run_rq1.sh` |
-| RQ2 | Scalability (N vs. time) | `bash scripts/run_rq2_paper.sh` |
-| RQ3 | Revenue & social welfare | `bash run_rq3.sh` |
-| RQ4 | FL convergence (MNIST/CIFAR) | `bash scripts/run_rq4_paper.sh` |
-| RQ5 | Privacy–utility tradeoff | `bash scripts/run_rq5_paper.sh` |
-| RQ6 | Robustness to false bids | `python exp_rq/rq6_robustness.py` |
-
-See `RUN_EXPERIMENTS.md` and `QUICK_REFERENCE.md` for full CLI options.
-
----
-
-## Reproducing Results
+For a lightweight download without historical datasets, use:
 
 ```bash
-# Reproduce Figure 9 (error bounds)
-python reproduce_fig9.py
-
-# Reproduce FL accuracy results
-python reproduce_fl_accuracy.py
-
-# Run invalid gradient experiment
-python run_invalid_gradient_experiment.py
+git clone --depth 1 --filter=blob:none --sparse https://github.com/szpsunkk/MFG-RegretNet.git
+cd MFG-RegretNet
+git sparse-checkout set reproducibility platform docs
 ```
 
-Pre-trained models are in `model/`. Datasets are in `data/`.
+## What the accuracy evidence shows
 
----
+The confirmation protocol has **18 settings**, seeds **231/232/233**, **10 clients**, and **100 rounds** per run. Final accuracy is the mean over rounds 96–100, recomputed from saved confusion matrices. The comparator in each setting is the best external mechanism with complete, feasible evidence.
 
-## Phase-by-Phase Pipeline
+| Dataset | Settings ahead of the best external comparator | Mean paired margin across settings |
+| --- | ---: | ---: |
+| CIFAR-10 | 8 / 8 | +1.701 percentage points |
+| MNIST | 5 / 10 | +0.037 percentage points |
 
-| Phase | Script | Description |
-|-------|--------|-------------|
-| 1 | `python run_phase1_full_check.py` | Validate data pipeline |
-| 2 | `python run_phase2_verify.py` | Verify PAC/VCG baselines |
-| 3 | `python train_mfg_regretnet.py` | Train MFG-RegretNet |
-| 4 | `python run_phase4_eval.py` | Evaluate RQ1/2/3 |
-| 5 | `python run_phase5_tables_figures.py` | Generate tables & figures |
+All settings, losses and unreachable comparisons are retained. An aggregation control shows that the advantage depends on the evaluated aggregation rule. Matching purchased privacy per round does not imply equal cumulative privacy for every client; the release includes the client ledgers and distribution summaries.
 
----
+The main and supplementary curves apply disclosed display smoothing. Unsmoothed per-round values and the original confusion matrices are included; endpoint tables are not smoothed.
+
+## Run the platform locally
+
+Requires Node.js 22 or later.
+
+```bash
+cd platform
+npm ci
+npm test
+npm run db:local
+npm run dev
+```
+
+Open `http://127.0.0.1:8091`. For your own cloud deployment, create a Pages project and D1 database, replace the placeholder in `wrangler.toml`, and follow [the deployment instructions](platform/README.md). No author account credentials or private participant access files are included.
+
+## Release layout
+
+| Location | Purpose |
+| --- | --- |
+| [`reproducibility/`](reproducibility/README.md) | Current experiment entrypoints and reproduction protocol |
+| [`reproducibility/snapshot/`](reproducibility/snapshot/) | Original numerical source files and frozen model artifacts, retaining historical relative paths |
+| [`reproducibility/evidence/`](reproducibility/evidence/) | Original RQ4 records, allocation specifications, privacy ledgers and paper summaries |
+| [`reproducibility/smpc/`](reproducibility/smpc/README.md) | Separate secure computation benchmark and retained failure history |
+| [`platform/`](platform/README.md) | Deployable research website and multi-user auction application |
+| [`docs/README_legacy.md`](docs/README_legacy.md) | Previous README and historical experiment instructions |
+
+The original root-level scripts, datasets and checkpoints are preserved for historical use. Their commands and timings refer to an earlier manuscript, rather than the current frozen protocol.
 
 ## Citation
 
-If you use this code, please cite:
+For the version supplied with this release:
 
 ```bibtex
-@article{sun2026privacy,
-  title={Privacy as Commodity: MFG-RegretNet for Large-Scale Privacy Trading in Federated Learning},
-  author={Sun, Kangkang and Li, Jianhua and Chen, Xiuzhen and Meng, Weizhi and Guo, Minyi},
-  journal={arXiv preprint arXiv:2603.28329},
-  year={2026}
+@misc{sun2026dependable,
+  title = {Dependable and Secure Privacy Trading in Federated Learning via MFG-RegretNet},
+  author = {Sun, Kangkang and Li, Jianhua and Chen, Xiuzhen and Meng, Weizhi and Guo, Minyi},
+  year = {2026},
+  note = {Author manuscript, October 25 revision},
+  url = {https://github.com/szpsunkk/MFG-RegretNet}
 }
 ```
+
+The manuscript link does not imply a publication or acceptance status. See the [validation record](reproducibility/VALIDATION.md) for checks performed on this release.

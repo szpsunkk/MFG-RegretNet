@@ -1,0 +1,12 @@
+{
+  "main_final2/revisions/p2v2_auction_side_20261022/exp/rq2_timing_p2v2.py": "dae0133e339ba399c19850752b1cdaf4228379810ced9c22ff03cc4cbd6708b2",
+  "main_final2/revisions/p2v2_auction_side_20261022/exp/p2v2_mech.py": "a1eee77de0fe6ece14c03c4dc91ef786626630469c6b7c5d9d6844a1d438c8fd",
+  "main_final2/revisions/p2v2_auction_side_20261022/exp/common_p2v2.py": "a4984138a4e1116af9e90740004cc71f1ec12757cfa1502a54b5d663694aae81",
+  "main_final2/revisions/step7_tee_smpc_20261014/exp/smpc_bench.py": "31065c848c14fedd72989a1352e6fd1d36234da216290788566853f90383ed0d",
+  "run/tdsc_revision/codex_p2v2_20261020/continuation_A7/QV-sel/training/g1/mfg_p2v2/model.pt": "baddeed7201f2d4dfe82bce9aeb65a0fed86d29759618cab4a7130f57a2b382b",
+  "run/tdsc_revision/codex_p2v2_20261020/A7_tau/table.json": "777b80c70115950ba1cb968bc35e9e3e66cf10c93ab6295175eb8b891d7dd3c7",
+  "worktrees/codex-p2v2-20261020/next/v2_model.py": "d2c0d6c4751905457873418ce669b69ba0f0b3da072b1bf6411d6a71be3888ee",
+  "worktrees/codex-p2v2-20261020/exp/p2_reference.py": "d4dfdbc7c253e3de452df4f3d900dad067f071d71e92416994be5195723fabcb",
+  "worktrees/codex-p2v2-20261020/a7flow/model.py": "1defd361aac95809ea713ae1be503befeebf0b106744c8fd900a0a6be94248de",
+  "worktrees/codex-p2v2-20261020/a7flow/tau.py": "0d0bb412774c7fbe81f5824d1e0222c7ac1bf2bb0edec202783a7923df9ac02a"
+}

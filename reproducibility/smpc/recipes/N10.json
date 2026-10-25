@@ -1,0 +1,902 @@
+{
+  "N": 10,
+  "operations": [
+    {
+      "operation": {
+        "kind": "public_linear",
+        "output_width": 64,
+        "shape": [
+          10,
+          3
+        ]
+      },
+      "calls": 2
+    },
+    {
+      "operation": {
+        "kind": "tanh",
+        "shape": [
+          10,
+          64
+        ]
+      },
+      "calls": 4
+    },
+    {
+      "operation": {
+        "kind": "public_linear",
+        "output_width": 64,
+        "shape": [
+          10,
+          64
+        ]
+      },
+      "calls": 2
+    },
+    {
+      "operation": {
+        "kind": "public_scale",
+        "shape": [
+          1,
+          64
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "sigmoid",
+        "shape": [
+          1,
+          1
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "minimum",
+        "rhs": "public",
+        "shape": [
+          1,
+          1
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "minimum",
+        "rhs": "secret",
+        "shape": [
+          1,
+          1
+        ]
+      },
+      "calls": 2
+    },
+    {
+      "operation": {
+        "kind": "public_scale",
+        "shape": [
+          1,
+          10
+        ]
+      },
+      "calls": 2
+    },
+    {
+      "operation": {
+        "kind": "bitonic_sort",
+        "shape": [
+          1,
+          16
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "compare_le",
+        "rhs": "secret",
+        "shape": [
+          1,
+          10
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "compare_lt",
+        "rhs": "public",
+        "shape": [
+          1,
+          10
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "secret_multiply",
+        "shape": [
+          1,
+          10
+        ]
+      },
+      "calls": 5
+    },
+    {
+      "operation": {
+        "kind": "compare_lt",
+        "rhs": "public",
+        "shape": [
+          1,
+          1
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "maximum_zero",
+        "shape": [
+          1,
+          10
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "minimum",
+        "rhs": "secret",
+        "shape": [
+          1,
+          10
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "compare_ge",
+        "rhs": "secret",
+        "shape": [
+          1,
+          1
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "compare_le",
+        "rhs": "public",
+        "shape": [
+          1,
+          1
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "compare_ge",
+        "rhs": "public",
+        "shape": [
+          1,
+          10
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "public_linear",
+        "output_width": 64,
+        "shape": [
+          650,
+          3
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "tanh",
+        "shape": [
+          650,
+          64
+        ]
+      },
+      "calls": 2
+    },
+    {
+      "operation": {
+        "kind": "public_linear",
+        "output_width": 64,
+        "shape": [
+          650,
+          64
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "public_scale",
+        "shape": [
+          650,
+          64
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "sigmoid",
+        "shape": [
+          650,
+          1
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "minimum",
+        "rhs": "public",
+        "shape": [
+          650,
+          1
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "minimum",
+        "rhs": "secret",
+        "shape": [
+          650,
+          1
+        ]
+      },
+      "calls": 2
+    },
+    {
+      "operation": {
+        "kind": "public_scale",
+        "shape": [
+          650,
+          10
+        ]
+      },
+      "calls": 2
+    },
+    {
+      "operation": {
+        "kind": "bitonic_sort",
+        "shape": [
+          650,
+          16
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "compare_le",
+        "rhs": "secret",
+        "shape": [
+          650,
+          10
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "compare_lt",
+        "rhs": "public",
+        "shape": [
+          650,
+          10
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "secret_multiply",
+        "shape": [
+          650,
+          10
+        ]
+      },
+      "calls": 5
+    },
+    {
+      "operation": {
+        "kind": "compare_lt",
+        "rhs": "public",
+        "shape": [
+          650,
+          1
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "maximum_zero",
+        "shape": [
+          650,
+          10
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "minimum",
+        "rhs": "secret",
+        "shape": [
+          650,
+          10
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "compare_ge",
+        "rhs": "secret",
+        "shape": [
+          650,
+          1
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "compare_le",
+        "rhs": "public",
+        "shape": [
+          650,
+          1
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "compare_ge",
+        "rhs": "public",
+        "shape": [
+          650,
+          10
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "secret_multiply",
+        "shape": [
+          10
+        ]
+      },
+      "calls": 2
+    },
+    {
+      "operation": {
+        "kind": "public_scale",
+        "shape": [
+          10,
+          64
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "sigmoid",
+        "shape": [
+          10,
+          1
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "minimum",
+        "rhs": "public",
+        "shape": [
+          10,
+          1
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "minimum",
+        "rhs": "secret",
+        "shape": [
+          10,
+          1
+        ]
+      },
+      "calls": 1
+    },
+    {
+      "operation": {
+        "kind": "public_scale",
+        "shape": [
+          10
+        ]
+      },
+      "calls": 1
+    }
+  ],
+  "sequential_recipe": [
+    {
+      "kind": "public_linear",
+      "shape": [
+        10,
+        3
+      ],
+      "output_width": 64
+    },
+    {
+      "kind": "tanh",
+      "shape": [
+        10,
+        64
+      ]
+    },
+    {
+      "kind": "public_linear",
+      "shape": [
+        10,
+        64
+      ],
+      "output_width": 64
+    },
+    {
+      "kind": "tanh",
+      "shape": [
+        10,
+        64
+      ]
+    },
+    {
+      "kind": "public_scale",
+      "shape": [
+        1,
+        64
+      ]
+    },
+    {
+      "kind": "sigmoid",
+      "shape": [
+        1,
+        1
+      ]
+    },
+    {
+      "kind": "minimum",
+      "shape": [
+        1,
+        1
+      ],
+      "rhs": "public"
+    },
+    {
+      "kind": "minimum",
+      "shape": [
+        1,
+        1
+      ],
+      "rhs": "secret"
+    },
+    {
+      "kind": "minimum",
+      "shape": [
+        1,
+        1
+      ],
+      "rhs": "secret"
+    },
+    {
+      "kind": "public_scale",
+      "shape": [
+        1,
+        10
+      ]
+    },
+    {
+      "kind": "bitonic_sort",
+      "shape": [
+        1,
+        16
+      ]
+    },
+    {
+      "kind": "public_scale",
+      "shape": [
+        1,
+        10
+      ]
+    },
+    {
+      "kind": "compare_le",
+      "shape": [
+        1,
+        10
+      ],
+      "rhs": "secret"
+    },
+    {
+      "kind": "compare_lt",
+      "shape": [
+        1,
+        10
+      ],
+      "rhs": "public"
+    },
+    {
+      "kind": "secret_multiply",
+      "shape": [
+        1,
+        10
+      ]
+    },
+    {
+      "kind": "compare_lt",
+      "shape": [
+        1,
+        1
+      ],
+      "rhs": "public"
+    },
+    {
+      "kind": "secret_multiply",
+      "shape": [
+        1,
+        10
+      ]
+    },
+    {
+      "kind": "maximum_zero",
+      "shape": [
+        1,
+        10
+      ]
+    },
+    {
+      "kind": "minimum",
+      "shape": [
+        1,
+        10
+      ],
+      "rhs": "secret"
+    },
+    {
+      "kind": "compare_ge",
+      "shape": [
+        1,
+        1
+      ],
+      "rhs": "secret"
+    },
+    {
+      "kind": "secret_multiply",
+      "shape": [
+        1,
+        10
+      ]
+    },
+    {
+      "kind": "compare_le",
+      "shape": [
+        1,
+        1
+      ],
+      "rhs": "public"
+    },
+    {
+      "kind": "secret_multiply",
+      "shape": [
+        1,
+        10
+      ]
+    },
+    {
+      "kind": "compare_ge",
+      "shape": [
+        1,
+        10
+      ],
+      "rhs": "public"
+    },
+    {
+      "kind": "secret_multiply",
+      "shape": [
+        1,
+        10
+      ]
+    },
+    {
+      "kind": "public_linear",
+      "shape": [
+        650,
+        3
+      ],
+      "output_width": 64
+    },
+    {
+      "kind": "tanh",
+      "shape": [
+        650,
+        64
+      ]
+    },
+    {
+      "kind": "public_linear",
+      "shape": [
+        650,
+        64
+      ],
+      "output_width": 64
+    },
+    {
+      "kind": "tanh",
+      "shape": [
+        650,
+        64
+      ]
+    },
+    {
+      "kind": "public_scale",
+      "shape": [
+        650,
+        64
+      ]
+    },
+    {
+      "kind": "sigmoid",
+      "shape": [
+        650,
+        1
+      ]
+    },
+    {
+      "kind": "minimum",
+      "shape": [
+        650,
+        1
+      ],
+      "rhs": "public"
+    },
+    {
+      "kind": "minimum",
+      "shape": [
+        650,
+        1
+      ],
+      "rhs": "secret"
+    },
+    {
+      "kind": "minimum",
+      "shape": [
+        650,
+        1
+      ],
+      "rhs": "secret"
+    },
+    {
+      "kind": "public_scale",
+      "shape": [
+        650,
+        10
+      ]
+    },
+    {
+      "kind": "bitonic_sort",
+      "shape": [
+        650,
+        16
+      ]
+    },
+    {
+      "kind": "public_scale",
+      "shape": [
+        650,
+        10
+      ]
+    },
+    {
+      "kind": "compare_le",
+      "shape": [
+        650,
+        10
+      ],
+      "rhs": "secret"
+    },
+    {
+      "kind": "compare_lt",
+      "shape": [
+        650,
+        10
+      ],
+      "rhs": "public"
+    },
+    {
+      "kind": "secret_multiply",
+      "shape": [
+        650,
+        10
+      ]
+    },
+    {
+      "kind": "compare_lt",
+      "shape": [
+        650,
+        1
+      ],
+      "rhs": "public"
+    },
+    {
+      "kind": "secret_multiply",
+      "shape": [
+        650,
+        10
+      ]
+    },
+    {
+      "kind": "maximum_zero",
+      "shape": [
+        650,
+        10
+      ]
+    },
+    {
+      "kind": "minimum",
+      "shape": [
+        650,
+        10
+      ],
+      "rhs": "secret"
+    },
+    {
+      "kind": "compare_ge",
+      "shape": [
+        650,
+        1
+      ],
+      "rhs": "secret"
+    },
+    {
+      "kind": "secret_multiply",
+      "shape": [
+        650,
+        10
+      ]
+    },
+    {
+      "kind": "compare_le",
+      "shape": [
+        650,
+        1
+      ],
+      "rhs": "public"
+    },
+    {
+      "kind": "secret_multiply",
+      "shape": [
+        650,
+        10
+      ]
+    },
+    {
+      "kind": "compare_ge",
+      "shape": [
+        650,
+        10
+      ],
+      "rhs": "public"
+    },
+    {
+      "kind": "secret_multiply",
+      "shape": [
+        650,
+        10
+      ]
+    },
+    {
+      "kind": "secret_multiply",
+      "shape": [
+        10
+      ]
+    },
+    {
+      "kind": "secret_multiply",
+      "shape": [
+        10
+      ]
+    },
+    {
+      "kind": "public_linear",
+      "shape": [
+        10,
+        3
+      ],
+      "output_width": 64
+    },
+    {
+      "kind": "tanh",
+      "shape": [
+        10,
+        64
+      ]
+    },
+    {
+      "kind": "public_linear",
+      "shape": [
+        10,
+        64
+      ],
+      "output_width": 64
+    },
+    {
+      "kind": "tanh",
+      "shape": [
+        10,
+        64
+      ]
+    },
+    {
+      "kind": "public_scale",
+      "shape": [
+        10,
+        64
+      ]
+    },
+    {
+      "kind": "sigmoid",
+      "shape": [
+        10,
+        1
+      ]
+    },
+    {
+      "kind": "minimum",
+      "shape": [
+        10,
+        1
+      ],
+      "rhs": "public"
+    },
+    {
+      "kind": "minimum",
+      "shape": [
+        10,
+        1
+      ],
+      "rhs": "secret"
+    },
+    {
+      "kind": "public_scale",
+      "shape": [
+        10
+      ]
+    }
+  ],
+  "public_selected": 8
+}

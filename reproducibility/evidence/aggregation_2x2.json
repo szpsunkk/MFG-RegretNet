@@ -1,0 +1,308 @@
+{
+ "registration": {
+  "seeds": {
+   "0.1": [
+    24,
+    25
+   ],
+   "0.5": [
+    24,
+    25
+   ]
+  },
+  "block_b_arm": {
+   "0.5": "CSRA",
+   "0.1": "CSRA"
+  },
+  "block_c_arm": "CSRA-declared"
+ },
+ "delta_pp": 0.5,
+ "counts_A": {
+  "registered": 16,
+  "complete": 16,
+  "result_sha256": {
+   "0.1|24|mfg_p2v2|eps": "1fda34ff6de0fa0c8a69ef6d7d59e4f189c2097d98f2176fc5ae19b15f7ee137",
+   "0.1|24|mfg_p2v2|datasize": "f92602672252b181802f6909136c89fe3c3b2b2f0562bca01d11171850335f17",
+   "0.1|24|Uniform-DP|eps": "f0d4cdeb37648cb21dbbd756f9250869fd1141cf0f6dabba3548a704e39e7860",
+   "0.1|24|Uniform-DP|datasize": "047b2a56985d9c1a07ef6209a307ab001071e7185a2f100aca6336668ff21bc7",
+   "0.1|25|mfg_p2v2|eps": "32e9445e32160ccda15e889bd7a9643d32ecb5f16d9c446f76cb513e801de66c",
+   "0.1|25|mfg_p2v2|datasize": "0be1451f63408a7b5e89aca1c2daf07d43db087f67ca91daefc53892f59ff7bd",
+   "0.1|25|Uniform-DP|eps": "436f2637ffb329b8dad579f5cac21b13e16c28f64b18776a26b0d6f00374f7dc",
+   "0.1|25|Uniform-DP|datasize": "295671a4896e090f3dd85ab7625f79c4535495ad24d05b63f9cdfe359b4062f0",
+   "0.5|24|mfg_p2v2|eps": "4d35b6aa44b0ae14b5957aa48134db0be07d9e345fe08bcd8f84ea3c783f39e2",
+   "0.5|24|mfg_p2v2|datasize": "807af1e42399e9c6a66233559f2f53e071ebce4e6b08c7e5bc54b23a5323c80a",
+   "0.5|24|Uniform-DP|eps": "1d3ad6c911cf64baf73f4eda0c2ce848eb6d874d799b76d20f0a66ea474a1120",
+   "0.5|24|Uniform-DP|datasize": "f92610bd9e4ea04347bf359129259b1e255f132bcf61d5da2a0f1c21ac8e5687",
+   "0.5|25|mfg_p2v2|eps": "f508fb30b220d8a500e371b18ddca9b8fb80731539dd482b03ab421f133ebf82",
+   "0.5|25|mfg_p2v2|datasize": "7e17e7d61e131ff4ed39aff4e424a5d9ffc7d25de45351e769a22e9f68a11838",
+   "0.5|25|Uniform-DP|eps": "5b0d2865128633be9707d3330b1ffc79750182583eac5a53678deb070728dd79",
+   "0.5|25|Uniform-DP|datasize": "a0acdd2dedcb194f1c39238919748fbdb0e4a1f8a659d428e66ed71bdd0c7f04"
+  }
+ },
+ "block_A": {
+  "pairs": [
+   {
+    "alpha": 0.1,
+    "seed": 24,
+    "accuracy": {
+     "mfg_p2v2|eps": 23.896,
+     "mfg_p2v2|datasize": 24.159999999999997,
+     "Uniform-DP|eps": 14.479999999999999,
+     "Uniform-DP|datasize": 24.504
+    },
+    "A": 9.416000000000002,
+    "D": -0.34400000000000475,
+    "G_U": 10.024000000000003,
+    "G_O": 0.2639999999999958,
+    "I": 9.760000000000007
+   },
+   {
+    "alpha": 0.1,
+    "seed": 25,
+    "accuracy": {
+     "mfg_p2v2|eps": 24.064000000000004,
+     "mfg_p2v2|datasize": 24.12,
+     "Uniform-DP|eps": 23.944000000000003,
+     "Uniform-DP|datasize": 24.104
+    },
+    "A": 0.120000000000001,
+    "D": 0.01600000000000179,
+    "G_U": 0.1599999999999966,
+    "G_O": 0.055999999999997385,
+    "I": 0.1039999999999992
+   },
+   {
+    "alpha": 0.5,
+    "seed": 24,
+    "accuracy": {
+     "mfg_p2v2|eps": 29.159999999999997,
+     "mfg_p2v2|datasize": 28.92,
+     "Uniform-DP|eps": 26.863999999999997,
+     "Uniform-DP|datasize": 29.232000000000003
+    },
+    "A": 2.2959999999999994,
+    "D": -0.31200000000000117,
+    "G_U": 2.3680000000000057,
+    "G_O": -0.23999999999999488,
+    "I": 2.6080000000000005
+   },
+   {
+    "alpha": 0.5,
+    "seed": 25,
+    "accuracy": {
+     "mfg_p2v2|eps": 28.871999999999996,
+     "mfg_p2v2|datasize": 28.808,
+     "Uniform-DP|eps": 29.543999999999997,
+     "Uniform-DP|datasize": 28.88
+    },
+    "A": -0.6720000000000006,
+    "D": -0.07199999999999918,
+    "G_U": -0.6639999999999979,
+    "G_O": -0.0639999999999965,
+    "I": -0.6000000000000014
+   }
+  ],
+  "mean": {
+   "A": 2.7900000000000005,
+   "D": -0.17800000000000082,
+   "G_U": 2.9720000000000018,
+   "G_O": 0.004000000000000448,
+   "I": 2.9680000000000013
+  },
+  "by_alpha": {
+   "0.1": {
+    "A": 4.768000000000002,
+    "D": -0.16400000000000148,
+    "G_U": 5.092,
+    "G_O": 0.1599999999999966,
+    "I": 4.932000000000003
+   },
+   "0.5": {
+    "A": 0.8119999999999994,
+    "D": -0.19200000000000017,
+    "G_U": 0.8520000000000039,
+    "G_O": -0.1519999999999957,
+    "I": 1.0039999999999996
+   }
+  },
+  "D_positive_pairs": 1,
+  "case": "aggregation"
+ },
+ "text_A": "Most of the gain over a uniform split of the same per-round privacy comes from the aggregation weights that our allocation implies: 2.79 pp under the epsilon weights of Algorithm 2 and -0.18 pp when both use data-size weights. Accuracy claims are stated for Algorithm 2.",
+ "counts_B": {
+  "registered": 8,
+  "complete": 8,
+  "result_sha256": {
+   "0.1|24|CSRA|eps": "cd2b20a3720e2f56f0ff0509ad093cd129bb73ce138077453a65b41afb6a3e55",
+   "0.1|24|CSRA|datasize": "e2bbde33b8a5b6afb5f00fbeb2c4fca00b73ed73453d891562b7d3b4f8275a3d",
+   "0.1|25|CSRA|eps": "b5582a53b527301127df3c49e0b849d82e89988f3a5ce27becaea487879abd51",
+   "0.1|25|CSRA|datasize": "3523557f9675fc38941698d5d7fe9e6a9da6ce79d70c1fdeddd84349b208b844",
+   "0.5|24|CSRA|eps": "90d073b7d830700613026e80b8537bebd916ff46920bdc953e717bfd2c8a1336",
+   "0.5|24|CSRA|datasize": "e149328ca09192d25cf625f2ec038a305a139cfb3612d8f64b5615d5d8441b8f",
+   "0.5|25|CSRA|eps": "a9cbdca67e1db09e8a3183017cee9c6ef41d4804192536ae4fc32fd6197fdd79",
+   "0.5|25|CSRA|datasize": "e4f5837652cdab2e4c480d624dd960fd5cc86412942296dc6975d8690315234b"
+  }
+ },
+ "block_B": {
+  "rows": [
+   {
+    "alpha": 0.1,
+    "seed": 24,
+    "arm": "CSRA",
+    "accuracy": {
+     "CSRA|eps": 22.568,
+     "CSRA|datasize": 26.183999999999997
+    },
+    "E_ee": 1.3279999999999994,
+    "E_ed": -2.2879999999999967,
+    "E_dd": -2.024000000000001
+   },
+   {
+    "alpha": 0.1,
+    "seed": 25,
+    "arm": "CSRA",
+    "accuracy": {
+     "CSRA|eps": 23.048000000000002,
+     "CSRA|datasize": 23.024
+    },
+    "E_ee": 1.0160000000000018,
+    "E_ed": 1.0400000000000027,
+    "E_dd": 1.096
+   },
+   {
+    "alpha": 0.5,
+    "seed": 24,
+    "arm": "CSRA",
+    "accuracy": {
+     "CSRA|eps": 26.208,
+     "CSRA|datasize": 28.975999999999996
+    },
+    "E_ee": 2.951999999999998,
+    "E_ed": 0.18400000000000105,
+    "E_dd": -0.05599999999999383
+   },
+   {
+    "alpha": 0.5,
+    "seed": 25,
+    "arm": "CSRA",
+    "accuracy": {
+     "CSRA|eps": 28.592000000000006,
+     "CSRA|datasize": 27.616000000000003
+    },
+    "E_ee": 0.2799999999999905,
+    "E_ed": 1.2559999999999931,
+    "E_dd": 1.1919999999999966
+   }
+  ],
+  "by_alpha": {
+   "0.1": {
+    "E_ee": 1.1720000000000006,
+    "E_ed": -0.623999999999997,
+    "E_dd": -0.4640000000000004
+   },
+   "0.5": {
+    "E_ee": 1.6159999999999943,
+    "E_ed": 0.7199999999999971,
+    "E_dd": 0.5680000000000014
+   }
+  },
+  "case": "protocol"
+ },
+ "text_B": "When the strongest baseline also uses data-size weights, it is not below our method in every setting (-0.46 (alpha 0.1) / +0.57 (alpha 0.5) pp with data-size weights for both); the accuracy advantage is stated for the epsilon-weighted aggregation of Algorithm 2.",
+ "counts_C": {
+  "registered": 8,
+  "complete": 8,
+  "result_sha256": {
+   "0.1|24|CSRA-declared|eps": "1ec700f38a62b2479af07157bb7921c19fa66ef29ea7ef641572350b1c2535b4",
+   "0.1|24|CSRA-declared|datasize": "c6cd72538c8f1d2698fbb07117b50af2fbdf656b0872f019da6660fa92b31520",
+   "0.1|25|CSRA-declared|eps": "3afe30d4c4b313dc79d11c53e74ebc427dfe924c0832cf70455d66c0c07d7d09",
+   "0.1|25|CSRA-declared|datasize": "33e26cdf0a19ccf0d2aaf0b46c722cd0048a61e10add046819dbc31ad56811e9",
+   "0.5|24|CSRA-declared|eps": "45637d28111f2c4a156f0f4912b866148d83d13b90a7d0247bf7a427efe74236",
+   "0.5|24|CSRA-declared|datasize": "cba980216b1c2e75b8fcdcaf6c324f0a8453a7e9ca5996060752a136d12c20d8",
+   "0.5|25|CSRA-declared|eps": "0d6cdfcd68ccb3d1151794e5b5312acbb6623bd8ee271bae9a8d666863d7f0c0",
+   "0.5|25|CSRA-declared|datasize": "8a0509f70657e9f9467071d118817f45eb4c633edf282884630a49c3fed3838a"
+  }
+ },
+ "block_C": {
+  "rows": [
+   {
+    "alpha": 0.1,
+    "seed": 24,
+    "accuracy": {
+     "CSRA-declared|eps": 20.976,
+     "CSRA-declared|datasize": 25.4
+    },
+    "F_ee": 2.9200000000000017,
+    "F_dd": -1.240000000000002,
+    "eps_per_client_round": 1.3771466842852533,
+    "R_e": -1.5920000000000023,
+    "R_d": -0.7839999999999989,
+    "eps_per_client_round_X": 0.13291666798293592
+   },
+   {
+    "alpha": 0.1,
+    "seed": 25,
+    "accuracy": {
+     "CSRA-declared|eps": 22.328,
+     "CSRA-declared|datasize": 22.624
+    },
+    "F_ee": 1.7360000000000042,
+    "F_dd": 1.4960000000000022,
+    "eps_per_client_round": 1.8015656734071672,
+    "R_e": -0.7200000000000024,
+    "R_d": -0.40000000000000213,
+    "eps_per_client_round_X": 0.280625002682209
+   },
+   {
+    "alpha": 0.5,
+    "seed": 24,
+    "accuracy": {
+     "CSRA-declared|eps": 26.911999999999995,
+     "CSRA-declared|datasize": 28.48
+    },
+    "F_ee": 2.248000000000001,
+    "F_dd": 0.4400000000000013,
+    "eps_per_client_round": 1.9749014458991587,
+    "R_e": 0.7039999999999971,
+    "R_d": -0.4959999999999951,
+    "eps_per_client_round_X": 0.3954166686534882
+   },
+   {
+    "alpha": 0.5,
+    "seed": 25,
+    "accuracy": {
+     "CSRA-declared|eps": 29.144000000000002,
+     "CSRA-declared|datasize": 28.592000000000002
+    },
+    "F_ee": -0.27200000000000557,
+    "F_dd": 0.21599999999999753,
+    "eps_per_client_round": 2.1637452775612473,
+    "R_e": 0.551999999999996,
+    "R_d": 0.9759999999999991,
+    "eps_per_client_round_X": 0.5470833335071802
+   }
+  ],
+  "by_alpha": {
+   "0.1": {
+    "F_ee": 2.328000000000003,
+    "F_dd": 0.1280000000000001,
+    "R_e": -1.1560000000000024,
+    "R_d": -0.5920000000000005
+   },
+   "0.5": {
+    "F_ee": 0.9879999999999978,
+    "F_dd": 0.3279999999999994,
+    "R_e": 0.6279999999999966,
+    "R_d": 0.240000000000002
+   }
+  },
+  "case": "ahead",
+  "privacy_ratio_to_X": 5.396116673836732
+ },
+ "text_C": "Against CSRA with releases equal to the declared budgets, which release 5.4 times as much privacy per round as the 1/(N-k) adaptation, MFG-RegretNet is ahead under the epsilon weights of Algorithm 2 by +2.33 (alpha 0.1) / +0.99 (alpha 0.5) pp (development data, CIFAR-10, B=30; +0.13 (alpha 0.1) / +0.33 (alpha 0.5) pp with data-size weights for both).",
+ "inputs_sha256": {
+  "manifest": "d073fc7847596fb4da996c581c311706e002a26c015e90c9d598da31d76cb832",
+  "registration": "6f4c005093d6542c27edae1e4bf034fce358b5155174d66c8ded48cd19729efe",
+  "analysis": "dd3d2cd4454b95340bd4152a37a4c96277924d1e7ab9d73a52ee3738812cf116"
+ }
+}

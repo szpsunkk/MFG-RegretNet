@@ -1,0 +1,213 @@
+{
+ "profiles": 10000,
+ "host": {
+  "host": "ops",
+  "platform": "Linux-6.8.0-59-generic-x86_64-with-glibc2.10",
+  "python": "3.8.3",
+  "torch": "2.4.1+cu121",
+  "numpy": "1.24.4",
+  "threads": 2,
+  "started": "2026-10-24 13:38:59 +0900"
+ },
+ "ours_no_purchase_share": {
+  "kappa3_B25": 0.0,
+  "kappa3_B50": 0.0,
+  "kappa3_B75": 0.0,
+  "kappa3_B100": 0.0,
+  "kappa30_B25": 0.0,
+  "kappa30_B50": 0.0,
+  "kappa30_B75": 0.0,
+  "kappa30_B100": 0.0
+ },
+ "baselines": {
+  "B25": {
+   "PAC": {
+    "revenue": 8.183763545769454,
+    "privacy_cost": 4.1021931559138975,
+    "welfare": 4.081570389855556,
+    "released_eps_sum": 9.0,
+    "budget_used": 0.32735054183077816,
+    "ir_violation_rate": 0.0,
+    "no_purchase_share": 0.0
+   },
+   "VCG": {
+    "revenue": 8.183763545769454,
+    "privacy_cost": 4.1021931559138975,
+    "welfare": 4.081570389855556,
+    "released_eps_sum": 9.0,
+    "budget_used": 0.32735054183077816,
+    "ir_violation_rate": 0.0,
+    "no_purchase_share": 0.0
+   },
+   "MFG-Pricing": {
+    "revenue": 25.000000019937755,
+    "privacy_cost": 12.765798221770012,
+    "welfare": 12.234201798167744,
+    "released_eps_sum": 25.465361271414906,
+    "budget_used": 1.0000000007975103,
+    "ir_violation_rate": 0.06706,
+    "no_purchase_share": 0.0
+   },
+   "CSRA": {
+    "revenue": 18.342463946347813,
+    "privacy_cost": 1.205853784523927,
+    "welfare": 17.13661016182389,
+    "released_eps_sum": 2.870211904761905,
+    "budget_used": 0.7336985578539125,
+    "ir_violation_rate": 0.01485,
+    "no_purchase_share": 0.0
+   },
+   "CSRA-declared": {
+    "revenue": 18.342463946347813,
+    "privacy_cost": 7.357623978301804,
+    "welfare": 10.98483996804601,
+    "released_eps_sum": 17.53755525842756,
+    "budget_used": 0.7336985578539125,
+    "ir_violation_rate": 0.0,
+    "no_purchase_share": 0.0
+   }
+  },
+  "B50": {
+   "PAC": {
+    "revenue": 8.183763545769454,
+    "privacy_cost": 4.1021931559138975,
+    "welfare": 4.081570389855556,
+    "released_eps_sum": 9.0,
+    "budget_used": 0.16367527091538908,
+    "ir_violation_rate": 0.0,
+    "no_purchase_share": 0.0
+   },
+   "VCG": {
+    "revenue": 8.183763545769454,
+    "privacy_cost": 4.1021931559138975,
+    "welfare": 4.081570389855556,
+    "released_eps_sum": 9.0,
+    "budget_used": 0.16367527091538908,
+    "ir_violation_rate": 0.0,
+    "no_purchase_share": 0.0
+   },
+   "MFG-Pricing": {
+    "revenue": 50.00000003987551,
+    "privacy_cost": 12.765798221770012,
+    "welfare": 37.2342018181055,
+    "released_eps_sum": 25.465361271414906,
+    "budget_used": 1.0000000007975103,
+    "ir_violation_rate": 0.0,
+    "no_purchase_share": 0.0
+   },
+   "CSRA": {
+    "revenue": 31.898563342026062,
+    "privacy_cost": 2.342410339130555,
+    "welfare": 29.55615300289551,
+    "released_eps_sum": 5.14895,
+    "budget_used": 0.6379712668405212,
+    "ir_violation_rate": 0.02326,
+    "no_purchase_share": 0.0
+   },
+   "CSRA-declared": {
+    "revenue": 31.898563342026062,
+    "privacy_cost": 9.248501448078558,
+    "welfare": 22.650061893947505,
+    "released_eps_sum": 20.33839363047108,
+    "budget_used": 0.6379712668405212,
+    "ir_violation_rate": 0.0,
+    "no_purchase_share": 0.0
+   }
+  },
+  "B75": {
+   "PAC": {
+    "revenue": 8.183763545769454,
+    "privacy_cost": 4.1021931559138975,
+    "welfare": 4.081570389855556,
+    "released_eps_sum": 9.0,
+    "budget_used": 0.10911684727692604,
+    "ir_violation_rate": 0.0,
+    "no_purchase_share": 0.0
+   },
+   "VCG": {
+    "revenue": 8.183763545769454,
+    "privacy_cost": 4.1021931559138975,
+    "welfare": 4.081570389855556,
+    "released_eps_sum": 9.0,
+    "budget_used": 0.10911684727692604,
+    "ir_violation_rate": 0.0,
+    "no_purchase_share": 0.0
+   },
+   "MFG-Pricing": {
+    "revenue": 75.00000008094013,
+    "privacy_cost": 12.765798221770012,
+    "welfare": 62.23420185917012,
+    "released_eps_sum": 25.465361271414906,
+    "budget_used": 1.0000000010792016,
+    "ir_violation_rate": 0.0,
+    "no_purchase_share": 0.0
+   },
+   "CSRA": {
+    "revenue": 42.54611514408175,
+    "privacy_cost": 2.99003689776049,
+    "welfare": 39.55607824632126,
+    "released_eps_sum": 6.420583333333333,
+    "budget_used": 0.5672815352544234,
+    "ir_violation_rate": 0.02572,
+    "no_purchase_share": 0.0
+   },
+   "CSRA-declared": {
+    "revenue": 42.54611514408175,
+    "privacy_cost": 9.943156768476042,
+    "welfare": 32.602958375605716,
+    "released_eps_sum": 21.358360793604703,
+    "budget_used": 0.5672815352544234,
+    "ir_violation_rate": 0.0,
+    "no_purchase_share": 0.0
+   }
+  },
+  "B100": {
+   "PAC": {
+    "revenue": 8.183763545769454,
+    "privacy_cost": 4.1021931559138975,
+    "welfare": 4.081570389855556,
+    "released_eps_sum": 9.0,
+    "budget_used": 0.08183763545769454,
+    "ir_violation_rate": 0.0,
+    "no_purchase_share": 0.0
+   },
+   "VCG": {
+    "revenue": 8.183763545769454,
+    "privacy_cost": 4.1021931559138975,
+    "welfare": 4.081570389855556,
+    "released_eps_sum": 9.0,
+    "budget_used": 0.08183763545769454,
+    "ir_violation_rate": 0.0,
+    "no_purchase_share": 0.0
+   },
+   "MFG-Pricing": {
+    "revenue": 100.00000007975102,
+    "privacy_cost": 12.765798221770012,
+    "welfare": 87.23420185798102,
+    "released_eps_sum": 25.465361271414906,
+    "budget_used": 1.0000000007975103,
+    "ir_violation_rate": 0.0,
+    "no_purchase_share": 0.0
+   },
+   "CSRA": {
+    "revenue": 50.865888244165966,
+    "privacy_cost": 3.3609803230265447,
+    "welfare": 47.50490792113942,
+    "released_eps_sum": 7.1431666666666676,
+    "budget_used": 0.5086588824416597,
+    "ir_violation_rate": 0.02649,
+    "no_purchase_share": 0.0
+   },
+   "CSRA-declared": {
+    "revenue": 50.865888244165966,
+    "privacy_cost": 10.261699205884419,
+    "welfare": 40.60418903828155,
+    "released_eps_sum": 21.835564680555464,
+    "budget_used": 0.5086588824416597,
+    "ir_violation_rate": 0.0,
+    "no_purchase_share": 0.0
+   }
+  }
+ },
+ "seconds": 3.7704315185546875
+}

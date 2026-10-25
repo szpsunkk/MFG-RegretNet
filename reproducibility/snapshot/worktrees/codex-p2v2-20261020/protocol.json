@@ -1,0 +1,311 @@
+{
+ "version": "p2-v1",
+ "created": "2026-10-18",
+ "roles": {
+  "setup_and_review": "Claude",
+  "execution": "Codex"
+ },
+ "design": "/home/skk/paper/FL-market/RQ4_P2_MECHANISM_REDESIGN_20261018.md",
+ "task": "/home/skk/paper/FL-market/CODEX_TASK_20261018_p2_mechanism.md",
+ "reference_code": {
+  "path": "/home/skk/paper/FL-market/main_final2/revisions/p2_mechanism_design_20261018/exp/p2_reference.py",
+  "sha256": "d4dfdbc7c253e3de452df4f3d900dad067f071d71e92416994be5195723fabcb"
+ },
+ "reference_tests": {
+  "path": "/home/skk/paper/FL-market/main_final2/revisions/p2_mechanism_design_20261018/exp/test_p2_reference.py",
+  "sha256": "3e58d5cb927ba543465674cbff3ab30df5565e6381c344dbe7904ca6de92e3ad"
+ },
+ "objective": "Train the learned mechanisms on the P2 error of Algorithm-2 aggregation, J_kappa = kappa*||alpha-pi||^2 + |I|/S^2, and give them the public task parameter kappa as an extra input; everything else as in the task-aware execution layer.",
+ "base_execution_layer": {
+  "copy_from": "/home/skk/paper/FL-market/worktrees/codex-taskaware-20261017 (exp/ and frozen/)",
+  "new_worktree": "/home/skk/paper/FL-market/worktrees/codex-p2-20261018",
+  "unchanged": [
+   "Dirichlet client split and Opacus-safe sizes",
+   "market_reports draws",
+   "contracts.settlement (minimum event epsilon 0.01, reject over-capacity, reject negative true utility)",
+   "DP-SGD runner and exact per-event calibration",
+   "Algorithm 2 epsilon-proportional aggregation (--aggr eps) for every arm except the declared diagnostic",
+   "CNN, initialisation, optimizer, learning rates (MNIST 0.1, CIFAR-10 0.05), batch 64, one local epoch",
+   "evaluation: mean accuracy of the final five rounds",
+   "development evaluation set: the CNN-development half of the reserved 10% training records, as in the task-aware campaign; never the official test set before Stage 3"
+  ]
+ },
+ "seeds": {
+  "already_used_elsewhere": {
+   "round2_dev": [
+    10,
+    11
+   ],
+   "round2_test": [
+    101,
+    102,
+    103
+   ],
+   "taskaware_dev": [
+    12,
+    13
+   ],
+   "taskaware_confirmation": [
+    211,
+    212,
+    213
+   ],
+   "geometry_only": [
+    301,
+    302,
+    303,
+    304,
+    305,
+    306,
+    307,
+    308,
+    309,
+    310
+   ]
+  },
+  "development": [
+   14,
+   15
+  ],
+  "confirmation": [
+   231,
+   232,
+   233
+  ],
+  "mechanism_training_seed": 42
+ },
+ "stage_minus1_kappa_hat": {
+  "cells": [
+   {
+    "dataset": "MNIST",
+    "alpha": 0.5
+   },
+   {
+    "dataset": "MNIST",
+    "alpha": 0.1
+   },
+   {
+    "dataset": "CIFAR10",
+    "alpha": 0.5
+   },
+   {
+    "dataset": "CIFAR10",
+    "alpha": 0.1
+   }
+  ],
+  "seeds": [
+   14,
+   15
+  ],
+  "warmup": "5 rounds of non-private FedAvg with data-size weights through the runner's own local-training path with an explicit noise multiplier of 1e-6 (same sampling, clipping 1.0, optimizer, averaging); initial model as in the runner for that seed",
+  "measurement": "round 6: clean clipped local updates of all 10 clients from the warm global model (float parameters only, flattened)",
+  "zeta2": "p2_reference.kappa_from_updates (unbiased dispersion around the unweighted mean)",
+  "noise_energy": "per client: runner.preview_participation(allocated_event_epsilon=1.0) gives noise multiplier, sample rate and optimizer steps; p2_reference.dp_noise_energy with clip 1.0, the dataset learning rate and the number of float parameters",
+  "kappa_hat": "geometric mean over the two seeds of zeta2 / mean noise energy, per (dataset, alpha)",
+  "also_report": "the same quantities measured at the initial model (round 1); reference only, not used",
+  "freeze": "write kappa_hat.json and record its SHA256 in the Stage 0 manifest before any Stage 0 FL run"
+ },
+ "stage0_oracle_check": {
+  "purpose": "Does aligning purchased privacy with data shares raise CNN accuracy under unchanged Algorithm 2? No mechanism training.",
+  "rounds": 40,
+  "budget": 30.0,
+  "seeds": [
+   14,
+   15
+  ],
+  "cells": [
+   {
+    "dataset": "MNIST",
+    "alpha": 0.5
+   },
+   {
+    "dataset": "MNIST",
+    "alpha": 0.1
+   },
+   {
+    "dataset": "CIFAR10",
+    "alpha": 0.5
+   },
+   {
+    "dataset": "CIFAR10",
+    "alpha": 0.1
+   }
+  ],
+  "shares": "pi from the reported (verified) sizes reports[...,2] of each round",
+  "arms": {
+   "CSRA": "existing adapter",
+   "PAC": "existing corrected adapter",
+   "Oracle-k0": "p2_reference.p2_oracle(kappa=0): largest affordable total under cost-only payments, i.e. every cap when affordable; stands for the saturating mechanisms",
+   "Aligned@PAC": "p2_reference.aligned_at_total with the per-round executed total of PAC in the same round and budget",
+   "Aligned@CSRA": "p2_reference.aligned_at_total with the per-round executed total of CSRA",
+   "Oracle-khat": "p2_reference.p2_oracle(kappa=kappa_hat(dataset, alpha))",
+   "Oracle-k3": "p2_reference.p2_oracle(kappa=3)",
+   "Oracle-k30": "p2_reference.p2_oracle(kappa=30)",
+   "Oracle-k0-datasize": "allocation of Oracle-k0 with --aggr datasize; diagnostic only, never a candidate"
+  },
+  "payments": "oracle and aligned arms pay cost v_i*eps_i (non-strategic upper references); settled through contracts.settlement",
+  "runs": 72,
+  "kappa_rule_selection": "per dataset choose the rule among {0.01 (evaluated by Oracle-k0), kappa_hat(dataset, alpha), 3, 30} with the highest mean development accuracy over both alphas and both seeds; ties go to the earlier rule in this list",
+  "gate": {
+   "pass_if": "CIFAR10: mean development accuracy of the best of {Oracle-khat, Oracle-k3, Oracle-k30} exceeds the best of {CSRA, PAC, Oracle-k0} by at least 1.0 percentage point (means over both alphas and both seeds)",
+   "report_without_gating": [
+    "Aligned@PAC minus PAC",
+    "Aligned@CSRA minus CSRA",
+    "Oracle-k0-datasize minus Oracle-k0",
+    "per-cell and per-seed values",
+    "realised TV, purchased epsilon, participants, J_kappa"
+   ],
+   "on_fail": "stop the P2 route; write the decision and results; release the task-aware confirmation hold",
+   "training_kappa_range": "log-uniform [0.003, 300]; if a selected kappa lies outside [0.03, 30], use [min(0.003, k/10), max(300, 10k)] over the selected values; record before Stage 1"
+  }
+ },
+ "stage1_training": {
+  "families": {
+   "mfg_p2": "MFGRegretNetScaled + kappa feature",
+   "mfg_nob_p2": "MFGRegretNetNoMF + kappa feature",
+   "regretnet_s_p2": "RegretNetScaled + kappa feature"
+  },
+  "optional_candidate": {
+   "mfg_p2_share": "mfg_p2 plus per-client d_i/mean(d) and cap_i/mean(cap) columns derived from the reports and the mean-field row"
+  },
+  "kappa_input": "p2_reference.kappa_feature over the training range, appended to the network input like the budget feature",
+  "objective": "replace the procurement term by mean p2_reference.p2_training_term(executed_eps, truthful_reports, kappa); keep the IR and regret augmented-Lagrangian terms and the budget projection",
+  "warm_start": "supervised imitation of p2_reference.p2_oracle allocations on a precomputed bank of training-distribution profiles (sample_profiles budgets, kappa log-uniform over the training range), payment targets max(v_i, posted price at B) * eps_i scaled to the budget; identical for all families",
+  "schedule": "task-aware schedule: 6000 warm steps, 6000 constrained steps, the last 2000 with the strong evaluation search at learning rate 3e-5; batch 64; identical for all families",
+  "search_domain": "valuation [0,1], cap [0, true cap], and downward size reports in [10, d_i] (grid d_i, 0.75 d_i, 0.5 d_i, 0.25 d_i, 10, then PGA on all three coordinates)",
+  "public_pilot": "before Stage 2, economic-only CPU pilots may fix learning rate, dual step and normalisation; decisions use only economic metrics, apply to all families and are archived",
+  "screen": {
+   "profiles": 512,
+   "budgets": [
+    10,
+    30,
+    100
+   ],
+   "kappa_values": "the selected deployment kappa values of both datasets",
+   "regret": "normalised mean found regret (gain / (B/N)) under the extended search must not exceed, at every budget, the larger of RegretNet-r2 and No-population-r2 evaluated with the same search; the strict 0.02 decision is reported separately",
+   "p2": "J_kappa of the executed allocation must be below that of V8F at B=30 and B=100 for each deployment kappa",
+   "monotonicity": "violation rates for v increased by 0.1, cap decreased by 10%, size decreased by 10% (change in own executed eps beyond 1e-3 in the wrong direction) must not exceed the larger of the two references",
+   "report": [
+    "IR violations",
+    "budget excess",
+    "mean executed epsilon",
+    "J_kappa ratio to p2_oracle",
+    "regret without the size dimension, for comparison with round 2"
+   ]
+  }
+ },
+ "stage2_development": {
+  "rounds": 40,
+  "seeds": [
+   14,
+   15
+  ],
+  "cells": [
+   {
+    "dataset": "MNIST",
+    "alpha": 0.5,
+    "mode": "budget",
+    "value": 30.0
+   },
+   {
+    "dataset": "MNIST",
+    "alpha": 0.5,
+    "mode": "privacy",
+    "value": 0.8
+   },
+   {
+    "dataset": "MNIST",
+    "alpha": 0.1,
+    "mode": "budget",
+    "value": 30.0
+   },
+   {
+    "dataset": "MNIST",
+    "alpha": 0.1,
+    "mode": "privacy",
+    "value": 0.8
+   },
+   {
+    "dataset": "CIFAR10",
+    "alpha": 0.5,
+    "mode": "budget",
+    "value": 30.0
+   },
+   {
+    "dataset": "CIFAR10",
+    "alpha": 0.5,
+    "mode": "privacy",
+    "value": 0.8
+   },
+   {
+    "dataset": "CIFAR10",
+    "alpha": 0.1,
+    "mode": "budget",
+    "value": 30.0
+   },
+   {
+    "dataset": "CIFAR10",
+    "alpha": 0.1,
+    "mode": "privacy",
+    "value": 0.8
+   }
+  ],
+  "arms": [
+   "each screened candidate",
+   "V8F",
+   "CSRA",
+   "PAC",
+   "Oracle-P2 (selected kappa; for privacy cells the aligned allocation at total 10*target)"
+  ],
+  "privacy_cells": "budgets calibrated per arm on CPU from allocations only, 100-round mean executed epsilon within 0.5% of the target, range [0.5, 110]; unreachable (arm, cell) pairs are not run and are listed with the reason; job lists carry exact budgets and expected allocation SHA256",
+  "selection": "one checkpoint per family by mean development accuracy over all cells it can enter; ties by mean development cross-entropy",
+  "gate": "selected MFG-P2 minus the best available of {CSRA, PAC, V8F} per cell, averaged over the CIFAR10 cells, is at least 0.5 percentage point; and selected MFG-P2 minus V8F averaged over the MNIST cells is at least -0.3 percentage point",
+  "on_fail": "stop; write results; release the task-aware confirmation hold"
+ },
+ "stage3_confirmation": {
+  "rounds": 100,
+  "seeds": [
+   231,
+   232,
+   233
+  ],
+  "stage": "test (official test set)",
+  "cells": "budget: MNIST B in {10, 30, 100}, CIFAR10 B in {30, 100}; privacy: target in {0.5, 0.8} for both datasets; all with alpha in {0.5, 0.1}; 18 cells",
+  "arms": [
+   "MFG-RegretNet-P2 (selected)",
+   "No-population-P2 (selected)",
+   "RegretNet-P2 (selected)",
+   "MFG-RegretNet V8F",
+   "RegretNet-r2 (regretnet_s_balance0.5)",
+   "No-population-r2 (mfg_nob_balance0)",
+   "DM-RegretNet (dm_s_seed42_ep150)",
+   "MFG-Pricing",
+   "Posted-price",
+   "Uniform-DP (per-round total of MFG-RegretNet-P2)",
+   "PAC",
+   "PAC-capped-legacy",
+   "VCG",
+   "VCG-capped-legacy",
+   "CSRA",
+   "Lin",
+   "Oracle-P2 reference (non-strategic, labelled)"
+  ],
+  "privacy_cells": "same calibration rule as Stage 2",
+  "endpoint": "mean accuracy of rounds 96-100; also macro-F1, cross-entropy, payments, purchased epsilon, TV, participants, J_kappa, cumulative RDP",
+  "analysis": "seed-paired differences of MFG-RegretNet-P2 against every arm with 95% intervals; all cells, arms and seeds reported"
+ },
+ "cross_campaign_rule": {
+  "hold": "no task-aware confirmation job starts until this rule decides",
+  "rule": "if P2 passes its Stage 2 gate, P2 goes to Stage 3 and the task-aware campaign stays at development (reported in the supplement); if P2 stops at Stage 0 or Stage 2, the hold is released and the task-aware protocol applies unchanged"
+ },
+ "reporting": [
+  "all stages, arms, cells, seeds and failures are reported",
+  "no selection on official test accuracy",
+  "no protocol change after the first Stage 0 FL run without a dated amendment file stating what changed and why, written before the affected runs",
+  "the manuscript is not edited"
+ ],
+ "outputs": {
+  "runs": "/home/skk/paper/FL-market/run/tdsc_revision/codex_p2_20261018/",
+  "reports": "/home/skk/paper/FL-market/main_final2/revisions/codex_p2_20261018/"
+ }
+}

@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS rooms (
+  id TEXT PRIMARY KEY,
+  state TEXT NOT NULL,
+  version INTEGER NOT NULL DEFAULT 1,
+  expires_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS rooms_expiry ON rooms(expires_at);
+CREATE TABLE IF NOT EXISTS rate_limits (
+  key TEXT PRIMARY KEY,
+  count INTEGER NOT NULL,
+  expires_at INTEGER NOT NULL
+);

@@ -33,3 +33,13 @@ data/cifar10/cifar-10-python.tar.gz
 # OS
 .DS_Store
 Thumbs.db
+
+# Current public reproducibility release: frozen artifacts are intentional.
+!reproducibility/snapshot/run/
+!reproducibility/smpc/reference/run/
+reproducibility/outputs/
+.venv/
+.venv-smpc/
+.env
+.env.*
+!.env.example

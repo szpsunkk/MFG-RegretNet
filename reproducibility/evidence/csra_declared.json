@@ -1,0 +1,146 @@
+{
+ "profiles": 10000,
+ "check_vs_original": 0.0,
+ "host": {
+  "host": "ops",
+  "platform": "Linux-6.8.0-59-generic-x86_64-with-glibc2.10",
+  "python": "3.8.3",
+  "torch": "2.4.1+cu121",
+  "numpy": "1.24.4",
+  "threads": 2,
+  "started": "2026-10-23 12:19:36 +0900"
+ },
+ "results": {
+  "B25_adapted": {
+   "regret_mean_x1e3": 261.2783028048035,
+   "regret_max": 10.420642535621562,
+   "ir_violation_rate": 0.01485,
+   "budget_used": 0.7336985578539125,
+   "released_eps_sum": 2.870211904761905,
+   "profiles": 10000
+  },
+  "B25_manuscript_row": {
+   "regret_mean_x1e3": 261.27830147743225,
+   "regret_max": 10.420641899108887,
+   "ir_violation_rate": 0.01484999991953373,
+   "budget_used": 0.7336985468864441,
+   "released_eps_sum": 2.8702118396759033,
+   "file": "main_final2/revisions/method_improvement_20261015/eval/rq1test_base2_B25.json"
+  },
+  "B25_declared": {
+   "regret_mean_x1e3": 71.02548113645422,
+   "regret_max": 9.447740256073953,
+   "ir_violation_rate": 0.0,
+   "budget_used": 0.7336985578539125,
+   "released_eps_sum": 17.53755525842756,
+   "profiles": 10000
+  },
+  "B50_adapted": {
+   "regret_mean_x1e3": 220.97392805535782,
+   "regret_max": 17.088113445391432,
+   "ir_violation_rate": 0.02326,
+   "budget_used": 0.6379712668405212,
+   "released_eps_sum": 5.14895,
+   "profiles": 10000
+  },
+  "B50_manuscript_row": {
+   "regret_mean_x1e3": 220.9739238023758,
+   "regret_max": 17.088111877441406,
+   "ir_violation_rate": 0.023259999230504036,
+   "budget_used": 0.6379712224006653,
+   "released_eps_sum": 5.148950099945068,
+   "file": "main_final2/revisions/method_improvement_20261015/eval/rq1test_base2_B50.json"
+  },
+  "B50_declared": {
+   "regret_mean_x1e3": 123.61499757225279,
+   "regret_max": 17.3789269142463,
+   "ir_violation_rate": 0.0,
+   "budget_used": 0.6379712668405212,
+   "released_eps_sum": 20.33839363047108,
+   "profiles": 10000
+  }
+ },
+ "rq3": {
+  "B25_adapted": {
+   "budget_used": 0.7336985578539125,
+   "revenue": 18.342463946347813,
+   "welfare": 17.13661016182389,
+   "privacy_cost": 1.205853784523927,
+   "released_eps_sum": 2.870211904761905,
+   "ir_violation_rate": 0.01485,
+   "no_purchase_share": 0.0,
+   "budget_violation_max": -0.0018649407606297075
+  },
+  "B25_declared": {
+   "budget_used": 0.7336985578539125,
+   "revenue": 18.342463946347813,
+   "welfare": 10.98483996804601,
+   "privacy_cost": 7.357623978301804,
+   "released_eps_sum": 17.53755525842756,
+   "ir_violation_rate": 0.0,
+   "no_purchase_share": 0.0,
+   "budget_violation_max": -0.0018649407606297075
+  },
+  "B50_adapted": {
+   "budget_used": 0.6379712668405212,
+   "revenue": 31.898563342026062,
+   "welfare": 29.55615300289551,
+   "privacy_cost": 2.342410339130555,
+   "released_eps_sum": 5.14895,
+   "ir_violation_rate": 0.02326,
+   "no_purchase_share": 0.0,
+   "budget_violation_max": -0.0019476261553563745
+  },
+  "B50_declared": {
+   "budget_used": 0.6379712668405212,
+   "revenue": 31.898563342026062,
+   "welfare": 22.650061893947505,
+   "privacy_cost": 9.248501448078558,
+   "released_eps_sum": 20.33839363047108,
+   "ir_violation_rate": 0.0,
+   "no_purchase_share": 0.0,
+   "budget_violation_max": -0.0019476261553563745
+  },
+  "B75_adapted": {
+   "budget_used": 0.5672815352544234,
+   "revenue": 42.54611514408175,
+   "welfare": 39.55607824632126,
+   "privacy_cost": 2.99003689776049,
+   "released_eps_sum": 6.420583333333333,
+   "ir_violation_rate": 0.02572,
+   "no_purchase_share": 0.0,
+   "budget_violation_max": -0.005340981800117106
+  },
+  "B75_declared": {
+   "budget_used": 0.5672815352544234,
+   "revenue": 42.54611514408175,
+   "welfare": 32.602958375605716,
+   "privacy_cost": 9.943156768476042,
+   "released_eps_sum": 21.358360793604703,
+   "ir_violation_rate": 0.0,
+   "no_purchase_share": 0.0,
+   "budget_violation_max": -0.005340981800117106
+  },
+  "B100_adapted": {
+   "budget_used": 0.5086588824416597,
+   "revenue": 50.865888244165966,
+   "welfare": 47.50490792113942,
+   "privacy_cost": 3.3609803230265447,
+   "released_eps_sum": 7.1431666666666676,
+   "ir_violation_rate": 0.02649,
+   "no_purchase_share": 0.0,
+   "budget_violation_max": -0.016116323772763508
+  },
+  "B100_declared": {
+   "budget_used": 0.5086588824416597,
+   "revenue": 50.865888244165966,
+   "welfare": 40.60418903828155,
+   "privacy_cost": 10.261699205884419,
+   "released_eps_sum": 21.835564680555464,
+   "ir_violation_rate": 0.0,
+   "no_purchase_share": 0.0,
+   "budget_violation_max": -0.016116323772763508
+  }
+ },
+ "seconds": 483.11386346817017
+}
