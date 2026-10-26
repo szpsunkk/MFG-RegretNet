@@ -5,9 +5,12 @@ Research code and a deployed, multi-user demonstration of **MFG-RegretNet** for 
 **[Open the platform](https://privacy-as-commodity.pages.dev/)** ·
 **[Compare algorithms](https://privacy-as-commodity.pages.dev/results)** ·
 **[Join an auction](https://privacy-as-commodity.pages.dev/auction)** ·
-**[Paper and supplement](https://privacy-as-commodity.pages.dev/paper)**
+**[Paper (PDF)](docs/papers/main_m_tdsc.pdf)** ·
+**[Supplement (PDF)](docs/papers/main_m_supp.pdf)**
 
 This repository accompanies *Dependable and Secure Privacy Trading in Federated Learning via MFG-RegretNet* by Kangkang Sun, Jianhua Li, Xiuzhen Chen, Weizhi Meng and Minyi Guo. The October 25, 2026 release contains the frozen **P2-v2 / QV-sel** implementation and evidence used in the current manuscript. Earlier implementations remain available at the repository root; use [`reproducibility/`](reproducibility/README.md) for the current results.
+
+The latest manuscript PDFs, updated **October 26, 2026**, are available directly in this repository: [main paper, 17 pages](docs/papers/main_m_tdsc.pdf) and [supplement, 12 pages](docs/papers/main_m_supp.pdf).
 
 ## What the project does
 
@@ -97,6 +100,7 @@ Open `http://127.0.0.1:8091`. For your own cloud deployment, create a Pages proj
 
 | Location | Purpose |
 | --- | --- |
+| [`docs/papers/`](docs/papers/) | Latest main paper and supplement PDFs (October 26, 2026) |
 | [`reproducibility/`](reproducibility/README.md) | Current experiment entrypoints and reproduction protocol |
 | [`reproducibility/snapshot/`](reproducibility/snapshot/) | Original numerical source files and frozen model artifacts, retaining historical relative paths |
 | [`reproducibility/evidence/`](reproducibility/evidence/) | Original RQ4 records, allocation specifications, privacy ledgers and paper summaries |
@@ -115,7 +119,7 @@ For the version supplied with this release:
   title = {Dependable and Secure Privacy Trading in Federated Learning via MFG-RegretNet},
   author = {Sun, Kangkang and Li, Jianhua and Chen, Xiuzhen and Meng, Weizhi and Guo, Minyi},
   year = {2026},
-  note = {Author manuscript, October 25 revision},
+  note = {Author manuscript, October 26 revision},
   url = {https://github.com/szpsunkk/MFG-RegretNet}
 }
 ```

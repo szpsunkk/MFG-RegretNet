@@ -5,7 +5,10 @@
 - 在线平台：https://privacy-as-commodity.pages.dev/
 - 算法比较：https://privacy-as-commodity.pages.dev/results
 - 多人拍卖：https://privacy-as-commodity.pages.dev/auction
-- 论文与补充材料：https://privacy-as-commodity.pages.dev/paper
+- 最新论文正文（PDF，17 页）：[main_m_tdsc.pdf](docs/papers/main_m_tdsc.pdf)
+- 最新附录（PDF，12 页）：[main_m_supp.pdf](docs/papers/main_m_supp.pdf)
+
+上述两份 PDF 更新于 **2026 年 10 月 26 日**，可直接在 GitHub 中预览或下载。
 
 最新入口是 [reproducibility/](reproducibility/README.md)，根目录原有实验脚本保留用于历史版本。新目录包含冻结检查点、阈值表、机制与基准代码，以及 880 次运行的原始结果、分配配置和累计隐私账本。哈希校验和分析程序可以重新生成论文表格及主要实验图。
 
